@@ -1,0 +1,100 @@
+<!--The content below is only a placeholder and can be replaced.-->
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-2">
+      <div class="row" *ngFor="let files of fileItems">
+        <div class="col">
+          <div ngbDropdown class="d-inline-block">
+            <button [ngClass]="{'btn':true, 'btn-outline-primary' : files[files.length-1].useForTraining == 1, 'btn-outline-warning' : files[files.length-1].useForTraining == 0}"
+              ngbDropdownToggle>{{files[0].name.slice(0, 30)}}</button>
+            <div ngbDropdownMenu>
+
+              <div *ngFor="let file of files">
+                <button class="dropdown-item" (click)="fileNameSelected(file)">{{file.name}} ({{file.lineCount}}) </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="col-sm-9" *ngIf="selectedFile">
+      <div class="container-fluid">
+
+        <ngb-alert [dismissible]="false" type="warning">
+          <span>
+            <strong>{{selectedFile.name.slice(0, 30) }} ({{selectedFile.lineCount}}) </strong>&nbsp;</span>
+          <button class="btn btn-warning btn btn-outline-dark" (click)="buildTrainingFeatures(selectedFile, true)"> Build Training Features </button>
+          <button class="btn btn-warning btn btn-outline-dark" [disabled]="!selectedFileDetails || selectedFileDetails.length <= 0"
+            (click)="buildTrainingFeatures(selectedFile, false)"> Predict </button>
+          <button class="btn btn-warning btn btn-outline-dark" [disabled]="!predictionAvailable" (click)="togglePredictionResult(predictionAvailable)">
+            {{showPredictionResult? 'Show Training Result': 'Show Prediction Result'}} </button>
+          <button class="btn btn-danger btn btn-outline-dark" [disabled]="!predictionAvailable" (click)="mergePrediction(selectedFile)">
+            Merge </button>
+          <button class="btn btn-danger btn btn-outline-danger" (click)="markSelecteFile(selectedFile)">Mark
+            <span *ngIf="selectedFile.useForTraining">
+              <strong>Not</strong>
+            </span> For Training</button>
+          <!--<button class="btn btn-danger btn btn-outline-danger" (click)="deleteSelecteFile(selectedFile)"> {{selectedFile.name }} ({{selectedFile.lineCount}}) Delete </button>-->
+
+        </ngb-alert>
+        <div *ngIf="predictionAvailable">
+          <ngb-alert type="info">
+            <div class="row">
+              <div class="col-sm-2">
+                <strong>Label</strong>
+              </div>
+              <div class="col-sm-2">Score
+                <strong>({{accuracyScore.score| number:'2.2-2'}})</strong>
+              </div>
+              <div class="col-sm-2">Wrong Prediction</div>
+              <div class="col-sm-2">Correct Prediction</div>
+              <div class="col-sm-2">Actual</div>
+            </div>
+          </ngb-alert>
+          <ngb-alert *ngFor="let score of accuracyScore.labels" type="danger">
+            <div class="row">
+              <div class="col-sm-2">
+                <strong>{{score.label}}</strong>
+              </div>
+              <div class="col-sm-2">{{score.score | number:'2.2-2'}}</div>
+              <div class="col-sm-2">{{score.wrongPrediction}}</div>
+              <div class="col-sm-2">{{score.correctPrediction}}</div>
+              <div class="col-sm-2">{{score.actual}}</div>
+            </div>
+          </ngb-alert>
+        </div>
+        <div *ngIf="!showPredictionResult">
+          <div *ngFor=" let line of selectedFileDetails ">
+
+            <ngb-alert [dismissible]="false " [type]="line.target==1 ? 'warning':'primary' ">
+              ({{line.line_id}})
+              <div class="form-check-inline">
+                <label class="form-check-label">
+                  <input type="checkbox" class="form-check-input " [checked]="line.target " (click)="lineSelected(line) " /> {{line.debug}}
+                </label>
+              </div>
+
+            </ngb-alert>
+          </div>
+        </div>
+        <div *ngIf="showPredictionResult">
+          <div *ngFor=" let line of predictResult ">
+
+            <ngb-alert [dismissible]="false " [type]="line.target===line.predict ? ( (line.target == 1)? 'warning': 'info'): 'danger'">
+              ({{line.line_id}})
+              <div class="form-check-inline">
+                <label class="form-check-label">
+                  <input type="checkbox" class="form-check-input " [checked]="line.predict " (click)="lineSelected(line, false) " /> {{ line.debug }} ==> ({{line.target}})
+                  <==> ({{line.probability | number : '1.2-5'}})
+                </label>
+              </div>
+
+            </ngb-alert>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

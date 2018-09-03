@@ -1,0 +1,48 @@
+<div class="container-fluid">
+    <h4>{{title}}</h4>
+    <div class="row">
+        <div class="col-sm-3">
+            <div ngbDropdown class="d-inline-block">
+                <button [ngClass]="{'btn':true, 'btn-outline-primary' : true}" ngbDropdownToggle>File Names </button>
+                <div ngbDropdownMenu>
+
+                    <div *ngFor="let file of masterFileNames">
+                        <button class="dropdown-item" (click)="getFileSections(file)">{{file.name}} ({{file.lineCount}}) </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" *ngIf="selectedFileItem">
+        <div class="col-sm-4">
+            <div class="container-fluid">
+                <div class="row" *ngFor="let section of fileSections">
+                    <div class="card">
+                        <div class="card-header" [id]="section.sectionId">
+
+                            <button class="btn btn-link" data-toggle="collapse" (click)="section.isCollapsed = !section.isCollapsed" aria-expanded="false"
+                                aria-controls="collapseOne">
+                                Section {{section.sectionId}}
+                            </button>
+
+                            <button class="btn btn-sm btn-primary" aria-expanded="false">
+                                Find Similar Sections
+                            </button>
+
+                        </div>
+
+                        <div [id]="section.sectionId" [ngbCollapse]="section.isCollapsed" aria-labelledby="headingOne" data-parent="#accordion">
+                            <div class="card-body">
+                                {{section.text}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            result
+        </div>
+    </div>
+</div>

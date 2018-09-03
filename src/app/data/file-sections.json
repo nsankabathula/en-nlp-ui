@@ -1,0 +1,278 @@
+[
+    {
+        "sectionId": 0,
+        "entities": [
+            {
+                "id": 0,
+                "startChar": 0,
+                "endChar": 5,
+                "label": "ORG",
+                "text": "Apple"
+            },
+            {
+                "id": 1,
+                "startChar": 27,
+                "endChar": 31,
+                "label": "GPE",
+                "text": "U.K"
+            },
+            {
+                "id": 2,
+                "startChar": 44,
+                "endChar": 54,
+                "label": "MONEY",
+                "text": "$1 billion"
+            },
+            {
+                "id": 3,
+                "startChar": 57,
+                "endChar": 62,
+                "label": "ORG",
+                "text": "Apple"
+            },
+            {
+                "id": 4,
+                "startChar": 84,
+                "endChar": 88,
+                "label": "GPE",
+                "text": "U.K"
+            },
+            {
+                "id": 5,
+                "startChar": 101,
+                "endChar": 111,
+                "label": "MONEY",
+                "text": "$1 billion"
+            },
+            {
+                "id": 6,
+                "startChar": 114,
+                "endChar": 119,
+                "label": "ORG",
+                "text": "Apple"
+            },
+            {
+                "id": 7,
+                "startChar": 141,
+                "endChar": 145,
+                "label": "GPE",
+                "text": "U.K"
+            },
+            {
+                "id": 8,
+                "startChar": 158,
+                "endChar": 168,
+                "label": "MONEY",
+                "text": "$1 billion"
+            }
+        ],
+        "sents": [
+            {
+                "id": 0,
+                "startChar": 0,
+                "endChar": 57,
+                "prob": 0.43119,
+                "text": "Apple is looking at buying U.K. startup for $1 billion."
+            },
+            {
+                "id": 1,
+                "startChar": 57,
+                "endChar": 114,
+                "prob": 0.22251,
+                "text": "Apple is looking at buying U.K. startup for $2 billion"
+            },
+            {
+                "id": 2,
+                "startChar": 114,
+                "endChar": 169,
+                "prob": 0.15779,
+                "text": "Apple is looking at buying U.K. startup for $3 billion"
+            }
+        ],
+        "text": "Apple is looking at buying U.K. startup for $1 billion.\r\nApple is looking at buying U.K. startup for $2 billion.\r\nApple is looking at buying U.K. startup for $3 billion."
+    },
+    {
+        "sectionId": 1,
+        "entities": [
+            {
+                "id": 0,
+                "startChar": 0,
+                "endChar": 5,
+                "label": "ORG",
+                "text": "Apple"
+            },
+            {
+                "id": 1,
+                "startChar": 27,
+                "endChar": 31,
+                "label": "GPE",
+                "text": "U.K"
+            },
+            {
+                "id": 2,
+                "startChar": 44,
+                "endChar": 54,
+                "label": "MONEY",
+                "text": "$1 billion"
+            },
+            {
+                "id": 3,
+                "startChar": 57,
+                "endChar": 62,
+                "label": "ORG",
+                "text": "Apple"
+            },
+            {
+                "id": 4,
+                "startChar": 84,
+                "endChar": 88,
+                "label": "GPE",
+                "text": "U.K"
+            },
+            {
+                "id": 5,
+                "startChar": 101,
+                "endChar": 111,
+                "label": "MONEY",
+                "text": "$1 billion"
+            },
+            {
+                "id": 6,
+                "startChar": 114,
+                "endChar": 119,
+                "label": "ORG",
+                "text": "Apple"
+            },
+            {
+                "id": 7,
+                "startChar": 141,
+                "endChar": 145,
+                "label": "GPE",
+                "text": "U.K"
+            },
+            {
+                "id": 8,
+                "startChar": 158,
+                "endChar": 168,
+                "label": "MONEY",
+                "text": "$1 billion"
+            }
+        ],
+        "sents": [
+            {
+                "id": 0,
+                "startChar": 0,
+                "endChar": 57,
+                "prob": 0.43119,
+                "text": "Apple is looking at buying U.K. startup for $1 billion."
+            },
+            {
+                "id": 1,
+                "startChar": 57,
+                "endChar": 114,
+                "prob": 0.22251,
+                "text": "Apple is looking at buying U.K. startup for $2 billion"
+            },
+            {
+                "id": 2,
+                "startChar": 114,
+                "endChar": 169,
+                "prob": 0.15779,
+                "text": "Apple is looking at buying U.K. startup for $3 billion"
+            }
+        ],
+        "text": "Apple is looking at buying U.K. startup for $1 billion.\r\nApple is looking at buying U.K. startup for $2 billion.\r\nApple is looking at buying U.K. startup for $3 billion."
+    },
+    {
+        "sectionId": 2,
+        "entities": [
+            {
+                "id": 0,
+                "startChar": 0,
+                "endChar": 5,
+                "label": "ORG",
+                "text": "Apple"
+            },
+            {
+                "id": 1,
+                "startChar": 27,
+                "endChar": 31,
+                "label": "GPE",
+                "text": "U.K"
+            },
+            {
+                "id": 2,
+                "startChar": 44,
+                "endChar": 54,
+                "label": "MONEY",
+                "text": "$1 billion"
+            },
+            {
+                "id": 3,
+                "startChar": 57,
+                "endChar": 62,
+                "label": "ORG",
+                "text": "Apple"
+            },
+            {
+                "id": 4,
+                "startChar": 84,
+                "endChar": 88,
+                "label": "GPE",
+                "text": "U.K"
+            },
+            {
+                "id": 5,
+                "startChar": 101,
+                "endChar": 111,
+                "label": "MONEY",
+                "text": "$1 billion"
+            },
+            {
+                "id": 6,
+                "startChar": 114,
+                "endChar": 119,
+                "label": "ORG",
+                "text": "Apple"
+            },
+            {
+                "id": 7,
+                "startChar": 141,
+                "endChar": 145,
+                "label": "GPE",
+                "text": "U.K"
+            },
+            {
+                "id": 8,
+                "startChar": 158,
+                "endChar": 168,
+                "label": "MONEY",
+                "text": "$1 billion"
+            }
+        ],
+        "sents": [
+            {
+                "id": 0,
+                "startChar": 0,
+                "endChar": 57,
+                "prob": 0.43119,
+                "text": "Apple is looking at buying U.K. startup for $1 billion."
+            },
+            {
+                "id": 1,
+                "startChar": 57,
+                "endChar": 114,
+                "prob": 0.22251,
+                "text": "Apple is looking at buying U.K. startup for $2 billion"
+            },
+            {
+                "id": 2,
+                "startChar": 114,
+                "endChar": 169,
+                "prob": 0.15779,
+                "text": "Apple is looking at buying U.K. startup for $3 billion"
+            }
+        ],
+        "text": "Apple is looking at buying U.K. startup for $1 billion.\r\nApple is looking at buying U.K. startup for $2 billion.\r\nApple is looking at buying U.K. startup for $3 billion."
+    }
+]

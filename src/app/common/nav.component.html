@@ -1,0 +1,41 @@
+<nav class="navbar sticky-top navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
+    <div class="container-fluid">
+        <a class="navbar-brand" routerLink="/home">NavBand
+            <!--<img src="/docs/4.0/assets/brand/bootstrap-solid.svg" width="30" height="30" alt="B">-->
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarToggler">
+            <ul class="navbar-nav">
+                <li>
+                    <a class="nav-item nav-link active" routerLink="/home">Home
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-item nav-link" routerLink="/training">Training</a>
+                </li>
+                <!--<a class="nav-item nav-link" href="#">Pricing</a>-->
+                <li class="nav-item dropdown" ngbDropdown>
+                    <a class="nav-link dropdown-toggle" ngbDropdownToggle id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true"
+                        aria-expanded="false">
+                        Compare
+                    </a>
+                    <div ngbDropdownMenu class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" routerLink="/compare-one">Master (Section) => One</a>
+                        <a class="dropdown-item" routerLink="/compare-all">Master (Section) => All</a>
+
+                        <!--
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Something else here</a>
+                        -->
+                    </div>
+                </li>
+                <!--<a class="nav-item nav-link disabled" href="#">Disabled</a>-->
+            </ul>
+        </div>
+    </div>
+</nav>
