@@ -7,9 +7,9 @@ import { FileItem, TLineItem, PLineItem, Accuracy, ClassDetails } from 'src/app/
 import { map } from 'rxjs/operators';
 import { element } from '@angular/core/src/render3/instructions';
 
-//const SERVER = "http://eef23428.ngrok.io/"
+const SERVER = "http://dff3b670.ngrok.io/"
 
-const SERVER = "http://localhost:8000/"
+//const SERVER = "http://localhost:8000/"
 @Injectable()
 export class TrainingService {
 

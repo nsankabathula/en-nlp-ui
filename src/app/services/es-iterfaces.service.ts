@@ -13,6 +13,7 @@ export interface IEsService {
 }
 
 export interface ISearch {
-    search(index, docType, body, filter): Observable<any>;
+    _search(index, docType, body, filter): Observable<any>;
 
 }
+

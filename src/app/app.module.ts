@@ -20,6 +20,12 @@ import { CompareService } from 'src/app/services/compare.service';
 import { CoreEsService } from 'src/app/services/es.service';
 import { CreditEsService } from 'src/app/services/es-credit.service';
 
+import { Ng5SliderModule } from 'ng5-slider';
+import { PyService } from 'src/app/services/python.service';
+import { SectionTextComponent } from 'src/app/compare/section-text.component';
+import { ModalContent } from 'src/app/common/modal-content.component';
+import { Doc2VecTrainingComponent } from 'src/app/compare/training.d2v.component';
+
 
 @NgModule({
   declarations: [
@@ -29,6 +35,9 @@ import { CreditEsService } from 'src/app/services/es-credit.service';
     HomeComponent,
     CompareAllComponent,
     CompareOneComponent,
+    SectionTextComponent,
+    ModalContent,
+    Doc2VecTrainingComponent
 
   ],
   imports: [
@@ -39,10 +48,13 @@ import { CreditEsService } from 'src/app/services/es-credit.service';
     AppBootstrapModule,
     FormsModule,
     ReactiveFormsModule,
+    Ng5SliderModule,
+
 
   ],
-  providers: [AppService, TrainingService, CompareService, CoreEsService, CreditEsService],
-  bootstrap: [AppComponent]
+  providers: [AppService, TrainingService, CompareService, CoreEsService, CreditEsService, PyService],
+  bootstrap: [AppComponent],
+  entryComponents: [ModalContent]
 })
 export class AppModule {
   constructor(private appSvc: AppService) {

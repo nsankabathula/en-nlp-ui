@@ -5,18 +5,17 @@ import { Injectable } from '@angular/core';
 import { Observable, of, from, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { IEsService, ISearch } from 'src/app/services/es-iterfaces.service';
-import { ESError, IAgreement, IESSearchResult, IESAggResult } from 'src/app/models/es.model';
+import { IESError, IAgreementSent, IESSearchResult, IESAggResult, IHit, ESError, Hit, IAggResult } from 'src/app/models/es.model';
 
-//const SERVER = "http://eef23428.ngrok.io/"
 
-const SERVER = "http://268736ef.ngrok.io/"
+const SERVER = "http://3a9f8c68.ngrok.io/"
 const ES_CONFIG = {
     host: SERVER,
     log: 'info'
 };
 const query_all_docs = {
     "from": 0,
-    "size": 100000000,
+    "size": 10000,
     "query": {
         "match_all": {}
     }
@@ -40,7 +39,21 @@ export class CoreEsService implements IEsService, ISearch {
         return new elasticsearch.Client(esConfig)
     }
 
-    public agg<T>(index, docType, body, filterPath): Observable<IESAggResult<T>> {
+
+
+
+    agg<T>(index, docType, body, filter): Observable<IAggResult> {
+        return this._search<IESAggResult>(index, docType, body, filter).pipe(
+            map(
+                (result: IESAggResult) => {
+                    console.log("agg", result)
+                    return result.aggregations as IAggResult
+                }
+            )
+        );
+    }
+
+    public _search<T>(index, docType, body, filterPath): Observable<IESSearchResult<T>> {
         body = (body) ? body : query_all_docs;
 
         return (from(this.client.search(
@@ -51,47 +64,41 @@ export class CoreEsService implements IEsService, ISearch {
                 filterPath: filterPath,
             }
         )).pipe(map((result) => {
-            console.log("search result", result);
 
-            return <IESAggResult<T>>result
-        }), catchError(e => throwError(<ESError>e.toJSON())))
-            /*
-                .then(response => { result = response },
-                error => { result = error }
-                ).then(() => {
-                    console.log(result);
-                })
-                */
+            return <IESSearchResult<T>>result
+        }), catchError(e => throwError(<IESError>e.toJSON())))
         );
 
 
     }
 
-    public search<T>(index, docType, body, filterPath): Observable<IESSearchResult<T>> {
-        body = (body) ? body : query_all_docs;
-
-        return (from(this.client.search(
-            {
-                index: index,
-                type: docType,
-                body: body,
-                filterPath: filterPath,
-            }
-        )).pipe(map((result) => {
-            console.log("search result", result);
-
-            return <IESSearchResult<T>>result
-        }), catchError(e => throwError(<ESError>e.toJSON())))
-            /*
-                .then(response => { result = response },
-                error => { result = error }
-                ).then(() => {
-                    console.log(result);
-                })
-                */
+    public find<T>(index, docType, body, filter): Observable<Array<T>> {
+        return this._search<IESSearchResult<T>>(index, docType, body, filter).pipe(
+            map(
+                (result: IESSearchResult<T>) => {
+                    return result.hits.hits.map((hit: IHit<T>) => {
+                        return hit._source
+                    })
+                }
+            )
         );
+    }
 
-
+    public findOne<T>(index, docType, body, filter): Observable<T> {
+        return this._search<IESSearchResult<T>>(index, docType, body, filter).pipe(
+            map(
+                (result: IESSearchResult<T>) => {
+                    return result.hits.hits.map((hit: IHit<T>) => {
+                        return hit._source
+                    })
+                }
+            )
+        ).pipe(map((result: Array<T>) => {
+            if (result && result.length > 0)
+                return result[0]
+            else
+                throwError(new ESError("Result is empty"))
+        }));
     }
 
 }
