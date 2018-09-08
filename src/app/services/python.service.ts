@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import { AppService } from './app.service';
 
 const SERVER = "http://c0c8ba9c.ngrok.io/";
 const headers = new HttpHeaders()
@@ -7,9 +8,11 @@ const headers = new HttpHeaders()
 const options = { headers: headers };
 @Injectable()
 export class PyService {
-
-    constructor(private http: HttpClient) {
-
+    //SERVER:string = "";
+    constructor(private http: HttpClient, private appSvc: AppService) {
+        this.appSvc.discover("8000").subscribe((result: any) => {
+            console.log(result);
+        })
     }
 
     private test(pyScript: string, body?: any, args?: Array<any>, ): any {
