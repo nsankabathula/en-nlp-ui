@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { CoreEsService } from 'src/app/services/es.service';
 import { Observable, of, from, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { IESSearchResult, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, ISortModel, IFileMeta, IFile, IStat, ISentSimilarity } from 'src/app/models/es.model';
+import { IESSearchResult, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, ISortModel, IFileMeta, IFile, IStat, ISentSimilarity, IDocSentSimilarityStats } from 'src/app/models/es.model';
+import { reserveSlots } from '@angular/core/src/render3/instructions';
+import { send } from 'q';
 const query_all_docs = {
     "from": 0,
     "size": 100000000,
@@ -175,8 +177,57 @@ export class CreditEsService {
         }
         return this.agg<IStat>(query, null).pipe(
             map((aggResult: IAggResult) => {
-                console.log("getSimilarityStats", aggResult)
+                //console.log("getSimilarityStats", aggResult)
                 return <IStat>aggResult[field];
+            }
+            ));
+
+    }
+
+    getDocSimilarityStats(name: string, field: string = "similarity", defaultVal: any = { isCollapsed: true }): Observable<IDocSentSimilarityStats> {
+
+        var query = {
+            "from": 0,
+            "size": 10000,
+            "sort": [
+                {
+                    "similarity": {
+                        "order": "desc"
+                    }
+                }
+            ],
+            "aggs": {
+                "similarity": {
+                    "stats": {
+                        "field": field
+                    }
+                }
+            }
+            ,
+            "_source": [
+                "sentId",
+                "sentText",
+                "startChar",
+                "endChar",
+                "name",
+                "similarity",
+                "sectionId"
+            ],
+            "query": {
+                "term": {
+                    "name.keyword": name
+                }
+            }
+
+        }
+        return this.esService._search<IDocSentSimilarityStats>(this.index, this.docType, query, null).pipe(
+            map((result: IESSearchResult<any>) => {
+                return <IDocSentSimilarityStats>{
+                    stats: result.aggregations[field],
+                    docSents: <Array<ISentSimilarity>>result.hits.hits.map((hit: IHit<ISentSimilarity>) => {
+                        return <ISentSimilarity>Object.assign(defaultVal, hit._source)
+                    })
+                }
             }
             ));
 
@@ -215,6 +266,52 @@ export class CreditEsService {
                             }
                         }
                     }
+                }
+            }
+        }
+
+
+        return this.esService.find<ISentSimilarity>(this.index, this.docType, query, null);
+    }
+
+    updateScore(sent: ISentSimilarity): Observable<any> {
+        const id = sent.name + "_" + sent.sectionId + "_" + sent.sentId;
+        console.log("updateScore", id);
+        return this.esService.update(this.index, this.docType, id, { score: sent.score })
+            .pipe(
+            map((result: any) => {
+                console.log("Result", result);
+                return result;
+            }
+            ));
+    }
+
+    getDocSimilarity(name: string): Observable<Array<ISentSimilarity>> {
+        var query = {
+            "from": 0,
+            "size": 100,
+            "sort": [
+                {
+                    "similarity": {
+                        "order": "desc"
+                    }
+                }
+            ],
+            "_source": [
+                "sentId",
+                "sentText",
+                "startChar",
+                "endChar",
+                "name",
+                "similarity",
+                "sectionId",
+                "sectionText",
+                "query",
+                "score"
+            ],
+            "query": {
+                "term": {
+                    "name.keyword": name
                 }
             }
         }

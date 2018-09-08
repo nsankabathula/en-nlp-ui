@@ -1,4 +1,3 @@
-import { extend } from "webdriver-js-extender";
 
 export class BaseESInterface {
     __name__: ""
@@ -42,7 +41,6 @@ export interface IHit<T> {
 }
 
 export class Hit<T> implements IHit<T> {
-    __name__: "Hit<T>"
     _index: string;
     _type: string;
     _id: any;
@@ -60,7 +58,8 @@ export interface IResultHit<T> {
 
 export interface IESSearchResult<T> {
     hits: IResultHit<T>;
-    took: 76;
+    took: number;
+    aggregations?: IAggResult
 }
 
 export interface IBasicBucket {
@@ -125,6 +124,7 @@ export interface IFileSent {
 export interface IFileSection extends IFileSectionMeta {
     text: string;
     isCollapsed: boolean;
+    ents?: Array<IEntity>
 
 }
 
@@ -180,8 +180,22 @@ export interface ISentSimilarity {
     startChar: number;
     endChar: number,
     query: string;
-    isCollapsed?: boolean
+    isCollapsed?: boolean;
+    score: 0 | 1;
 
+}
 
+export interface IDocSentSimilarityStats {
+    stats: IStat,
+    docSents: Array<ISentSimilarity>
+}
+
+export interface IESQuery {
+    from: number,
+    size: number,
+    sort?: Array<any>,
+    aggs?: any
+    _source?: Array<any>
+    query?: any
 
 }

@@ -38,12 +38,16 @@
 
                             <button class="btn btn-link" data-toggle="collapse" (click)="section.isCollapsed = !section.isCollapsed" aria-expanded="false"
                                 aria-controls="collapseOne">
-                                Section {{section.sectionId}}
+                                Section {{section.sectionId}}: {{section.text.substring(0, 25)}} ...
                             </button>
 
                             <button class="btn btn-sm btn-primary" aria-expanded="false" (click)="callPythonScript(section)">
                                 Find Similar Sections
                             </button>
+                            <button class="btn btn-sm btn-info" aria-expanded="false" (click)="showEntityModal(section)">
+                                NER
+                            </button>
+
 
                         </div>
 
@@ -87,7 +91,7 @@
 
 
                             <div class="card-body">
-                                <app-section-text [data]="doc"></app-section-text>
+                                <app-section-similarity [data]="doc"></app-section-similarity>
                             </div>
 
 
@@ -100,3 +104,16 @@
     </div>
 
 </div>
+<ng-template #showDocModal *ngIf="sentSimDoc && sentSimDoc.length>0">
+    <p>{{sentSimDoc[0].query}}</p>
+    <p *ngFor="let sent of sentSimDoc">
+        <span class="badge badge-secondary">{{sent.sectionId}}</span>
+        <span class="badge badge-light">{{sent.sectionText.substring(0,30)}} ... {{sent.sectionText.substring(sent.sectionText.length-30)}}</span>
+        <br/> {{sent.sentText}}
+        <span class="badge badge-info">{{sent.similarity}}</span>
+        <button class="btn btn-sm btn-info" aria-expanded="false" (click)="toggleScore(sent)">
+            Toggle Score({{sent.score}})
+        </button>
+
+    </p>
+</ng-template>

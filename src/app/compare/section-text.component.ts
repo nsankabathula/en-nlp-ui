@@ -2,7 +2,7 @@ import { Component, Input, OnChanges, SimpleChange } from '@angular/core';
 import { ISentSimilarity } from 'src/app/models/es.model';
 
 @Component({
-    selector: 'app-section-text',
+    selector: 'app-section-similarity',
     template: `
     <div *ngIf="textArray && textArray.length>0">
         

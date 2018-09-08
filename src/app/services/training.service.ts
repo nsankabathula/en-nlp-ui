@@ -7,7 +7,7 @@ import { FileItem, TLineItem, PLineItem, Accuracy, ClassDetails } from 'src/app/
 import { map } from 'rxjs/operators';
 import { element } from '@angular/core/src/render3/instructions';
 
-const SERVER = "http://dff3b670.ngrok.io/"
+const SERVER = "http://c0c8ba9c.ngrok.io/"
 
 //const SERVER = "http://localhost:8000/"
 @Injectable()

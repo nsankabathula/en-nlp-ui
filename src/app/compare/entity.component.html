@@ -1,0 +1,38 @@
+<div class="modal-header">
+    <h4 class="modal-title">
+        <div class="btn-group btn-group-toggle" data-toggle="buttons" *ngIf="entityLabels && entityLabels.length>0">
+            <label [ngClass]="{'btn btn-outline-primary':true, 'active': ent.checked}" class="btn btn-secondary " *ngFor="let ent of entityLabels">
+                <input type="radio" name="options" [id]="ent.label" autocomplete="off" [checked]="ent.checked" (change)="toggleEntity(ent)"> {{ent.label}}
+                <span class="badge badge-info">{{ent.count}}</span>
+            </label>
+        </div>
+    </h4>
+    <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+
+    <div class="entities">
+        <ng-container *ngFor="let ent of textEntities">
+            <div *ngIf="ent.label === 'text';then text else mark">
+            </div>
+            <ng-template #text>
+                {{ent.text}}
+            </ng-template>
+            <ng-template #mark>
+                <div *ngIf="ent.checked;then entity else regular">
+                </div>
+                <ng-template #entity>
+                    <mark [data-entity]="ent.clazz">{{ent.text}}</mark>
+                </ng-template>
+                <ng-template #regular>
+                    {{ent.text}}
+                </ng-template>
+            </ng-template>
+        </ng-container>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Close click')">Close</button>
+</div>

@@ -8,7 +8,7 @@ import { IEsService, ISearch } from 'src/app/services/es-iterfaces.service';
 import { IESError, IAgreementSent, IESSearchResult, IESAggResult, IHit, ESError, Hit, IAggResult } from 'src/app/models/es.model';
 
 
-const SERVER = "http://3a9f8c68.ngrok.io/"
+const SERVER = "http://3e18eae8.ngrok.io/"
 const ES_CONFIG = {
     host: SERVER,
     log: 'info'
@@ -46,7 +46,7 @@ export class CoreEsService implements IEsService, ISearch {
         return this._search<IESAggResult>(index, docType, body, filter).pipe(
             map(
                 (result: IESAggResult) => {
-                    console.log("agg", result)
+                    //console.log("agg", result)
                     return result.aggregations as IAggResult
                 }
             )
@@ -85,20 +85,37 @@ export class CoreEsService implements IEsService, ISearch {
     }
 
     public findOne<T>(index, docType, body, filter): Observable<T> {
-        return this._search<IESSearchResult<T>>(index, docType, body, filter).pipe(
-            map(
-                (result: IESSearchResult<T>) => {
-                    return result.hits.hits.map((hit: IHit<T>) => {
-                        return hit._source
-                    })
-                }
-            )
-        ).pipe(map((result: Array<T>) => {
+        return this.find<T>(index, docType, body, filter).pipe(map((result: Array<T>) => {
             if (result && result.length > 0)
                 return result[0]
             else
                 throwError(new ESError("Result is empty"))
         }));
+    }
+
+    public update(index: string, docType: string, id: any, doc: any): Observable<any> {
+        console.log("update doc", id, doc)
+
+        return this._update(index, docType, id, { doc: doc })
+
+    }
+
+    public _update(index: string, docType: string, id: any, body: any): Observable<any> {
+        console.log("_update ", id, body)
+
+        return from(this.client.update({
+            index: index,
+            type: docType,
+            id: id,
+            body: body
+        })
+        ).pipe(map((result) => {
+            console.log("_update", result);
+            return <IESSearchResult<any>>result
+        }),
+            catchError(e => throwError(<IESError>e.toJSON())));
+
+
     }
 
 }

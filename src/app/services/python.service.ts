@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 
-const SERVER = "http://dff3b670.ngrok.io/";
+const SERVER = "http://c0c8ba9c.ngrok.io/";
 const headers = new HttpHeaders()
     .set("Content-Type", "application/json");
 const options = { headers: headers };

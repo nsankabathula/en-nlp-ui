@@ -1,16 +1,17 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ViewChild, TemplateRef } from '@angular/core';
 
 import { Observable } from 'rxjs';
 import { forkJoin } from "rxjs";
 import { error } from 'util';
 import { FileItem } from 'src/app/models/model';
 import { FileSection } from 'src/app/models/compare.models';
-import { IESError, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, IFileMeta, IFile, IFileSection, ISentSimilarity, IStat } from 'src/app/models/es.model';
+import { IESError, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, IFileMeta, IFile, IFileSection, ISentSimilarity, IStat, IEntity } from 'src/app/models/es.model';
 import { CreditEsService } from 'src/app/services/es-credit.service';
 import { Options, LabelType, ChangeContext, PointerType } from 'ng5-slider';
 import { PyService } from 'src/app/services/python.service';
 import { NgbModal, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap/';
 import { ModalContent } from 'src/app/common/modal-content.component';
+import { EntityModalContent } from 'src/app/compare/entity.component';
 
 @Component({
     selector: 'app-compare-all',
@@ -24,6 +25,7 @@ export class CompareAllComponent {
     documentSimilarities: Array<ISentSimilarity> = []
     similartityStats: IStat = null;
     fileMetaData: Array<IFileMeta> = []
+    sentSimDoc: Array<ISentSimilarity> = [];
 
     sliderOptions: Options = {
         floor: -1,
@@ -39,6 +41,8 @@ export class CompareAllComponent {
             return (Math.round(value * 100) / 100).toString();
         }
     };
+    @ViewChild('showDocModal')
+    private docModal: TemplateRef<any>;
 
     constructor(private csService: CreditEsService, private pythonSvc: PyService, private modalSvc: NgbModal) {
 
@@ -95,12 +99,17 @@ export class CompareAllComponent {
             (res: IFile) => {
                 this.selectedFileMeta = fileItem
                 this.document = res;
-                console.log(typeof this.document)
+
                 this.document.sections = this.document.sections.map((value: IFileSection) => {
+                    value.ents = [].concat(this.document.ents.filter((ent: IEntity) => {
+                        return value.sectionId === ent.sectionId
+                    }))
 
                     value.isCollapsed = true;
                     return value;
                 })
+
+                //console.log(this.document.sections[0])
 
 
             }
@@ -141,16 +150,13 @@ export class CompareAllComponent {
     }
 
     showDoc(doc: ISentSimilarity) {
-        this.csService.getDoc(<IFileMeta>{ name: doc.name }).subscribe(
-            (res: IFile) => {
-                const text = res.text
-                this.showModal(doc.name, text);
-                /*
-                const modalRef = this.modalSvc.open(ModalContent, { centered: true, size: 'lg', windowClass: 'dark-modal' });
-                modalRef.componentInstance.name = doc.name;
-                modalRef.componentInstance.text = text
-*/
+        this.csService.getDocSimilarity(doc.name).subscribe(
+            (res: Array<ISentSimilarity>) => {
+                this.sentSimDoc = res;
 
+            }, (err: any) => { console.error(err) }
+            , () => {
+                this.showModal(doc.name)
             }
         )
 
@@ -158,11 +164,26 @@ export class CompareAllComponent {
 
     }
 
-    showModal(name: string, text: string) {
+    showModal(name: string) {
         const modalRef = this.modalSvc.open(ModalContent, { centered: true, size: 'lg', windowClass: 'dark-modal' });
         modalRef.componentInstance.name = name;
-        modalRef.componentInstance.text = text
+        //modalRef.componentInstance.text = text
+        modalRef.componentInstance.modalBody = this.docModal;
 
+    }
+
+    toggleScore(sent: ISentSimilarity) {
+        sent.score = (sent.score > 0) ? 0 : 1;
+        this.csService.updateScore(sent).subscribe((result: any) => {
+            console.log(result);
+        })
+    }
+
+    showEntityModal(section: IFileSection) {
+        const modalRef = this.modalSvc.open(EntityModalContent, { centered: true, size: 'lg', windowClass: 'dark-modal' })
+
+        modalRef.componentInstance.ents = section.ents;
+        modalRef.componentInstance.text = section.text
     }
 
 }

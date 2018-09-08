@@ -25,6 +25,7 @@ import { PyService } from 'src/app/services/python.service';
 import { SectionTextComponent } from 'src/app/compare/section-text.component';
 import { ModalContent } from 'src/app/common/modal-content.component';
 import { Doc2VecTrainingComponent } from 'src/app/compare/training.d2v.component';
+import { EntityModalContent, EntityStyleDirective } from 'src/app/compare/entity.component';
 
 
 @NgModule({
@@ -37,8 +38,9 @@ import { Doc2VecTrainingComponent } from 'src/app/compare/training.d2v.component
     CompareOneComponent,
     SectionTextComponent,
     ModalContent,
-    Doc2VecTrainingComponent
-
+    Doc2VecTrainingComponent,
+    EntityModalContent,
+    EntityStyleDirective
   ],
   imports: [
     BrowserModule,
@@ -54,7 +56,7 @@ import { Doc2VecTrainingComponent } from 'src/app/compare/training.d2v.component
   ],
   providers: [AppService, TrainingService, CompareService, CoreEsService, CreditEsService, PyService],
   bootstrap: [AppComponent],
-  entryComponents: [ModalContent]
+  entryComponents: [ModalContent, EntityModalContent]
 })
 export class AppModule {
   constructor(private appSvc: AppService) {
