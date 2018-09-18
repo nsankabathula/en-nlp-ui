@@ -59,32 +59,33 @@ export interface IResultHit<T> {
 export interface IESSearchResult<T> {
     hits: IResultHit<T>;
     took: number;
-    aggregations?: IAggResult
+    aggregations?: IAggResult<any>
 }
 
-export interface IBasicBucket {
+export interface IBasicBucket<T> {
     doc_count_error_upper_bound: number
-    buckets: Array<IBucket>
+    buckets: Array<IBucket<T>>
 }
 
-export interface IAggResult {
-    [key: string]: IBasicBucket | IStat;
+export interface IAggResult<T> {
+    [key: string]: IBasicBucket<T> | IStat;
 }
-
+/*
 interface IBucketNode {
     [key: string]: Array<IBucket>;
 }
+*/
 
 
-export interface IBucket {
+export interface IBucket<T> {
     key: any;
     doc_count: number | any;
     bg_count?: number | any;
-    [key: string]: IBasicBucket;
+    [key: string]: IBasicBucket<T>;
 }
 
-export interface IESAggResult extends IESSearchResult<any> {
-    aggregations: IAggResult
+export interface IESAggResult<T> extends IESSearchResult<any> {
+    aggregations: IAggResult<T>
 }
 
 export class IAgreementSent {
@@ -109,10 +110,11 @@ export interface IFileSectionMeta {
     sectionId: number;
     sentCount: number;
     //text: string;
+    index?: string
 
 }
 
-export interface IFileSent {
+export interface IFileSentMeta {
     sectionId: number;
     sentId: number
     text: string;
@@ -121,10 +123,23 @@ export interface IFileSent {
 
 }
 
+export interface IFileSent extends IFileSentMeta {
+    sectionId: number;
+    sentId: number
+    text: string;
+    startChar: number;
+    endChar: number;
+    similarity: number
+
+}
+
 export interface IFileSection extends IFileSectionMeta {
     text: string;
     isCollapsed: boolean;
     ents?: Array<IEntity>
+    sents?: Array<IFileSent>
+    simStats?: IStat
+
 
 }
 
@@ -151,19 +166,31 @@ export interface IFile {
     sents: Array<IFileSent>
     text: string
     ents?: Array<IEntity>
+    simStats?: IStat
+    isCollapsed?: boolean
+    query?: any
 }
 
+
+
 export interface IStat {
-    count: number;
+    count?: number;
     min: number;
     max: number;
-    avg: number;
-    sum: number;
-    buckets?: Array<IBucket>
+    avg?: number;
+    sum?: number;
+    buckets?: Array<IBucket<any>>
     minValue?: number;
     maxValue?: number
 }
+export enum Score {
+    MATCH = 1, //"match",
+    MODERATE_MATCH = 2, //"moderate-match",
+    NOTMATCH = 0,//"no_match",
+    FALSE_POSITIVE = -1, //"type1-false_positive",
+    FALSE_NEGATIVE = -2//"type1-false_negative"
 
+}
 export interface ISentSimilarity {
     /*"sentId",
                 "sectionText",
@@ -176,12 +203,15 @@ export interface ISentSimilarity {
     sentText: string
     sectionId: number;
     sectionText: string
-    similarity: number;
+    sentSimilarity: number;
     startChar: number;
     endChar: number,
-    query: string;
+    query: any;
     isCollapsed?: boolean;
-    score: 0 | 1;
+    target: Score;
+    words?: Array<string>
+    rank: number;
+    docCount: number;
 
 }
 
@@ -199,3 +229,34 @@ export interface IESQuery {
     query?: any
 
 }
+
+export interface ISimilaritySectionBucket {
+    doc_count: number;
+    endChar: any
+    startChar: any
+    key: number
+    maxSim: { value: number }
+    minSim: { value: number }
+    sectionText: any,
+    sents: any,
+    sims: any,
+    query: any
+
+}
+
+export interface ISimilarityDocBucket {
+    key: string
+    doc_count: number
+    section: {
+        buckets: Array<ISimilaritySectionBucket>
+    }
+}
+
+export interface ISimilarityResult {
+    name: {
+        buckets: Array<ISimilarityDocBucket>
+    }
+
+}
+
+

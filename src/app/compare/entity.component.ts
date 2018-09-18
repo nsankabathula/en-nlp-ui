@@ -55,8 +55,13 @@ export class EntityModalContent implements OnChanges, OnInit {
 
                 var prevStart, prevEnd = 0;
                 that.textEntities = [];
+                that.ents = that.ents.filter((ent: IEntity) => {
+                    return ent.endChar - ent.startChar > 1 && ent.text.trim().length > 0
+                })
+
                 that.ents.forEach((ent: IEntity) => {
                     //console.log(ent)
+
                     if (ent.label !== "ORG" && ent.label !== "GPE" && ent.label !== "PERSON") {
                         if (!that.entMap.has(ent.label)) {
                             that.entMap.set(ent.label, []);
@@ -66,6 +71,7 @@ export class EntityModalContent implements OnChanges, OnInit {
                     else {
                         ent.label = "text"
                     }
+
                     that.textEntities.push(
                         {
                             text: that.text.substring(prevStart, ent.startChar),

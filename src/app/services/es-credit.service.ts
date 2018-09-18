@@ -1,8 +1,10 @@
+declare var require: any;
+
 import { Injectable } from '@angular/core';
 import { CoreEsService } from 'src/app/services/es.service';
 import { Observable, of, from, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { IESSearchResult, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, ISortModel, IFileMeta, IFile, IStat, ISentSimilarity, IDocSentSimilarityStats } from 'src/app/models/es.model';
+import { IESSearchResult, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, ISortModel, IFileMeta, IFile, IStat, ISentSimilarity, IDocSentSimilarityStats, ISimilarityResult, ISimilarityDocBucket, IFileSentMeta, IFileSent, IFileSection, IFileSectionMeta } from 'src/app/models/es.model';
 import { reserveSlots } from '@angular/core/src/render3/instructions';
 import { send } from 'q';
 const query_all_docs = {
@@ -44,9 +46,12 @@ const compare = function (key, order = "asc") {
         );
     };
 }
+
+//const ES_QUERIES = require("../queries/es-credit.json");
+
 @Injectable()
 export class CreditEsService {
-    private METADATA_INDEX: string = "files"
+    private METADATA_INDEX: string = "demo.meta"
     private index: string = "credit"
     private docType: string = "agreement"
 
@@ -54,8 +59,8 @@ export class CreditEsService {
 
     }
 
-    agg<T>(body, filter): Observable<IAggResult> {
-        return this.esService.agg<IESAggResult>(this.index, this.docType, body, filter)
+    agg<T>(body, filter, index = this.index): Observable<IAggResult<T>> {
+        return this.esService.agg<T>(index, this.docType, body, filter)
         /*.pipe(
             map(
                 (result: IESAggResult) => {
@@ -91,12 +96,12 @@ export class CreditEsService {
             }
 
         return this.agg<Array<any>>(query_counts, null).pipe(
-            map((res: IAggResult) => {
+            map((res: IAggResult<any>) => {
                 if (res.names && sortKeys && sortKeys.length > 0)
                     res.names.buckets.sort(compare(sortKeys[0].field, sortKeys[0].order))
 
                 if (res.names && sortKeys && sortKeys.length > 1)
-                    res.names.buckets.forEach((nameBucket: IBucket) => {
+                    res.names.buckets.forEach((nameBucket: IBucket<any>) => {
                         if (nameBucket.sections) {
 
                             nameBucket.sections.buckets.sort(compare(sortKeys[1].field, sortKeys[1].order))
@@ -128,10 +133,14 @@ export class CreditEsService {
                     "filePath",
                     "sections.sectionId",
                     "sections.sentCount",
-                    "sections.text"
+                    "sections.text",
+                    "sections.index"
                 ]
             };
-        return this.esService.find<IFileMeta>(this.METADATA_INDEX, null, query, null)
+        return this.esService.find<IFileMeta>(this.METADATA_INDEX, null, query, null).pipe(map((res: Array<IFileMeta>) => {
+            console.log("getFileMetadata", res);
+            return res;
+        }))
     }
 
     getDoc(meta: IFileMeta): Observable<IFile> {
@@ -157,11 +166,16 @@ export class CreditEsService {
             }
         }
 
-        return this.esService.findOne<IFile>(this.METADATA_INDEX, null, query, null)
+        return this.esService.findOne<IFile>(this.METADATA_INDEX, null, query, null).pipe(map((res: IFile) => {
+            res.sections.forEach((sec) => {
+                sec.index = res.name.toLowerCase() + "_" + sec.sectionId.toString()
+            })
+            return res
+        }))
 
     }
 
-    getSimilarityStats(field: string = "similarity"): Observable<IStat> {
+    getSimilarityStats(index = this.index, field: string = "similarity"): Observable<IStat> {
 
         var query = {
             "from": 0,
@@ -175,9 +189,9 @@ export class CreditEsService {
             }
 
         }
-        return this.agg<IStat>(query, null).pipe(
-            map((aggResult: IAggResult) => {
-                //console.log("getSimilarityStats", aggResult)
+        return this.agg<IStat>(query, null, index).pipe(
+            map((aggResult: IAggResult<IStat>) => {
+                console.log("getSimilarityStats", aggResult)
                 return <IStat>aggResult[field];
             }
             ));
@@ -233,14 +247,14 @@ export class CreditEsService {
 
     }
 
-    getDocSimilarities(minSimilarity: number = 0.6, maxSimilarity: number = 0.9): Observable<Array<ISentSimilarity>> {
+    getDocSimilarities(index = this.index, minSimilarity: number = 0.6, maxSimilarity: number = 0.9): Observable<Array<ISentSimilarity>> {
         var query = {
             "from": 0,
             "size": 50,
             "sort": [
                 {
-                    "similarity": {
-                        "order": "desc"
+                    "name.keyword": {
+                        "order": "asc"
                     }
                 }
             ],
@@ -250,34 +264,32 @@ export class CreditEsService {
                 "startChar",
                 "endChar",
                 "name",
-                "similarity",
+                "sentSimilarity",
                 "sectionId",
                 "sectionText",
-                "query"
+                "query",
+                "words",
+                "_id",
+                "rank",
+                "docCount"
             ],
             "query": {
                 "bool": {
-                    "must": { "match_all": {} },
-                    "filter": {
-                        "range": {
-                            "similarity": {
-                                "gte": minSimilarity,
-                                "lte": maxSimilarity
-                            }
-                        }
+                    "must": {
+                        "term": { "sectionId": -2 }
                     }
                 }
             }
         }
 
 
-        return this.esService.find<ISentSimilarity>(this.index, this.docType, query, null);
+        return this.esService.find<ISentSimilarity>(index, null, query, null);
     }
 
-    updateScore(sent: ISentSimilarity): Observable<any> {
+    updateTarget(sent: ISentSimilarity, index: string = this.index): Observable<any> {
         const id = sent.name + "_" + sent.sectionId + "_" + sent.sentId;
         console.log("updateScore", id);
-        return this.esService.update(this.index, this.docType, id, { score: sent.score })
+        return this.esService.update(index, this.docType, id, { target: sent.target })
             .pipe(
             map((result: any) => {
                 console.log("Result", result);
@@ -286,15 +298,21 @@ export class CreditEsService {
             ));
     }
 
-    getDocSimilarity(name: string): Observable<Array<ISentSimilarity>> {
+
+
+    getDocSimilarity(name: string, index: string = this.index): Observable<Array<ISentSimilarity>> {
         var query = {
             "from": 0,
             "size": 100,
             "sort": [
                 {
-                    "similarity": {
+                    "sentSimilarity": {
                         "order": "desc"
-                    }
+                    },
+                    "sectionSimilarity": {
+                        "order": "desc"
+                    },
+
                 }
             ],
             "_source": [
@@ -304,10 +322,12 @@ export class CreditEsService {
                 "endChar",
                 "name",
                 "similarity",
+                "sentSimilarity",
+                "sectionSimilarity",
                 "sectionId",
                 "sectionText",
                 "query",
-                "score"
+                "target"
             ],
             "query": {
                 "term": {
@@ -317,116 +337,79 @@ export class CreditEsService {
         }
 
 
-        return this.esService.find<ISentSimilarity>(this.index, this.docType, query, null);
+        return this.esService.find<ISentSimilarity>(index, this.docType, query, null).pipe(map((res) => {
+            res.forEach((value) => {
+                value.query.index = value.query.name.toLowerCase() + "_" + value.query.sectionId
+            })
+            return res;
+        }));
     }
+
+    getSimBySection(minSimilarity: number = 0.3, maxSimilarity: number = 0.7, index: string = this.index): Observable<Array<IFile>> {
+        const query =
+            {
+                "id": "getSimBySection",
+                "params": {
+                    "minSimilarity": minSimilarity,
+                    "maxSimilarity": maxSimilarity
+                }
+            };
+
+        return this.esService.agg(index, this.docType, query, null, true).pipe(map((res: ISimilarityResult) => {
+            //console.log("getSimBySection", res);
+            var simQuery = {
+                name: "",
+                sectionId: ""
+            };
+            const docs: Array<IFile> = res.name.buckets.map((bucket: ISimilarityDocBucket) => {
+                var sections: Array<IFileSection> = bucket.section.buckets.map((section) => {
+                    simQuery = section.query.hits.hits[0]._source.query;
+                    return <IFileSection>{
+                        text: section.sectionText.hits.hits[0]._source.sectionText,
+                        simStats: {
+                            min: section.minSim.value,
+                            max: section.maxSim.value
+                        },
+                        sectionId: section.key,
+                        sents: (<Array<IFileSentMeta>>section.sents.hits.hits.map((sent, idx) => {
+                            return <IFileSent>{
+                                sentId: sent._source.sentId,
+                                endChar: section.endChar.hits.hits[idx]._source.endChar,
+                                startChar: section.startChar.hits.hits[idx]._source.startChar,
+                                sectionId: section.key,
+                                similarity: section.sims.hits.hits[idx]._source.sentSimilarity,
+                                text: section.sectionText.hits.hits[0]._source.sectionText.substring(section.startChar.hits.hits[idx]._source.startChar, section.endChar.hits.hits[idx]._source.endChar)
+                            }
+                        })).sort(compare("startChar", "asc"))
+                    }
+                });
+                var sectionSents: Array<IFileSent> = [];
+
+                sections.forEach((section) => {
+                    sectionSents = sectionSents.concat(section.sents)
+                })
+
+                const doc = <IFile>{
+                    name: bucket.key,
+                    sections: sections,
+                    query: simQuery,
+                    simStats: {
+                        min: sections[sections.length - 1].simStats.min,
+                        max: sections[0].simStats.max
+                    },
+                    sents: [].concat(sectionSents),
+                    isCollapsed: true
+                }
+                doc.query = Object.assign(doc.query, { "index": doc.query.name.toLowerCase() + "_" + doc.query.sectionId })
+                //console.log(doc.query)
+                return doc
+            })
+            return docs;
+        }));
+
+    }// End Of Function
 
 
 }
 
 
-/*
-        var query = {
-            "aggs": {
-                "similarity": {
-                    "histogram": {
-                        "field": "similarity",
-                        "interval": 0.0002,
-                        "min_doc_count": 1
-                    },
-                    "aggs": {
-                        "sent": {
-                            "top_hits": {
-                                "_source": "sentText",
-                                "size": 20,
-                                "sort": [
-                                    {
-                                        "name": {
-                                            "order": "asc"
-                                        }
-                                    },
-                                    {
-                                        "sectionId": {
-                                            "order": "asc"
-                                        }
-                                    },
-                                    {
-                                        "sentId": {
-                                            "order": "asc"
-                                        }
-                                    }
-                                ]
-                            }
-                        },
-                        "section": {
-                            "top_hits": {
-                                "_source": "sectionText",
-                                "size": 1,
-                                "sort": [
-                                    {
-                                        "name": {
-                                            "order": "asc"
-                                        }
-                                    },
-                                    {
-                                        "sectionId": {
-                                            "order": "asc"
-                                        }
-                                    },
-                                    {
-                                        "sentId": {
-                                            "order": "asc"
-                                        }
-                                    }
-                                ]
-                            }
-                        },
-                        "name": {
-                            "top_hits": {
-                                "_source": "name",
-                                "size": 1,
-                                "sort": [
-                                    {
-                                        "name": {
-                                            "order": "asc"
-                                        }
-                                    },
-                                    {
-                                        "sectionId": {
-                                            "order": "asc"
-                                        }
-                                    },
-                                    {
-                                        "sentId": {
-                                            "order": "asc"
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                }
-            },
-            "size": 0,
-            "version": true,
-            "_source": {
-                "excludes": []
-            },
-            "stored_fields": [
-                "*"
-            ],
-            "script_fields": {},
-            "docvalue_fields": [],
-            "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "match_all": {}
-                        }
-                    ],
-                    "filter": [],
-                    "should": [],
-                    "must_not": []
-                }
-            }
-        }
-        */

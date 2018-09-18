@@ -6,9 +6,10 @@ import { Observable } from 'rxjs';
 import { FileItem, TLineItem, PLineItem, Accuracy, ClassDetails } from 'src/app/models/model';
 import { map } from 'rxjs/operators';
 import { element } from '@angular/core/src/render3/instructions';
+import { ConfigService } from 'src/app/services/config.service';
 
-const SERVER = "http://c0c8ba9c.ngrok.io/"
-
+//const SERVER = "http://c0c8ba9c.ngrok.io/"
+const SERVER = ConfigService.getServer("8000");
 //const SERVER = "http://localhost:8000/"
 @Injectable()
 export class TrainingService {

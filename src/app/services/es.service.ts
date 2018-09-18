@@ -6,9 +6,10 @@ import { Observable, of, from, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { IEsService, ISearch } from 'src/app/services/es-iterfaces.service';
 import { IESError, IAgreementSent, IESSearchResult, IESAggResult, IHit, ESError, Hit, IAggResult } from 'src/app/models/es.model';
+import { ConfigService } from 'src/app/services/config.service';
 
 
-const SERVER = "http://3e18eae8.ngrok.io/"
+const SERVER = ConfigService.getServer("9200")//"http://3e18eae8.ngrok.io/"
 const ES_CONFIG = {
     host: SERVER,
     log: 'info'
@@ -42,38 +43,55 @@ export class CoreEsService implements IEsService, ISearch {
 
 
 
-    agg<T>(index, docType, body, filter): Observable<IAggResult> {
-        return this._search<IESAggResult>(index, docType, body, filter).pipe(
+    agg<T>(index, docType, body, filter, useTemplate: boolean = false): Observable<IAggResult<T>> {
+        return this._search<IESAggResult<T>>(index, docType, body, filter, useTemplate).pipe(
             map(
-                (result: IESAggResult) => {
-                    //console.log("agg", result)
-                    return result.aggregations as IAggResult
+                (result: IESAggResult<T>) => {
+                    console.log("agg", result)
+                    return result.aggregations as IAggResult<T>
                 }
             )
         );
     }
 
-    public _search<T>(index, docType, body, filterPath): Observable<IESSearchResult<T>> {
+
+    public _search<T>(index, docType, body, filterPath, useTemplate: boolean = false): Observable<IESSearchResult<T>> {
         body = (body) ? body : query_all_docs;
+        if (!useTemplate) {
+            return (from(this.client.search(
+                {
+                    index: index,
+                    type: docType,
+                    body: body,
+                    filterPath: filterPath,
+                }
+            )).pipe(map((result) => {
 
-        return (from(this.client.search(
-            {
-                index: index,
-                type: docType,
-                body: body,
-                filterPath: filterPath,
-            }
-        )).pipe(map((result) => {
+                return <IESSearchResult<T>>result
+            }), catchError(e => throwError(<IESError>e.toJSON())))
+            );
+        }
+        else {
+            return (from(this.client.searchTemplate(
+                {
+                    index: index,
+                    type: docType,
+                    body: body,
+                    filterPath: filterPath,
+                }
+            )).pipe(map((result) => {
 
-            return <IESSearchResult<T>>result
-        }), catchError(e => throwError(<IESError>e.toJSON())))
-        );
+                return <IESSearchResult<T>>result
+            }), catchError(e => throwError(<IESError>e.toJSON())))
+            );
+
+        }
 
 
     }
 
-    public find<T>(index, docType, body, filter): Observable<Array<T>> {
-        return this._search<IESSearchResult<T>>(index, docType, body, filter).pipe(
+    public find<T>(index, docType, body, filter, useTemplate: boolean = false): Observable<Array<T>> {
+        return this._search<IESSearchResult<T>>(index, docType, body, filter, useTemplate).pipe(
             map(
                 (result: IESSearchResult<T>) => {
                     return result.hits.hits.map((hit: IHit<T>) => {
@@ -84,8 +102,8 @@ export class CoreEsService implements IEsService, ISearch {
         );
     }
 
-    public findOne<T>(index, docType, body, filter): Observable<T> {
-        return this.find<T>(index, docType, body, filter).pipe(map((result: Array<T>) => {
+    public findOne<T>(index, docType, body, filter, useTemplate: boolean = false): Observable<T> {
+        return this.find<T>(index, docType, body, filter, useTemplate).pipe(map((result: Array<T>) => {
             if (result && result.length > 0)
                 return result[0]
             else

@@ -1,0 +1,10 @@
+[
+    "http://27b7e2a3.ngrok.io->localhost:8000",
+    "http://aadba8c3.ngrok.io->localhost:5601",
+    "http://e764668f.ngrok.io/?token=6298145616b1878cbe7db48af0f91d4098c50899fa583a07&token=6298145616b1878cbe7db48af0f91d4098c50899fa583a07->localhost:8888",
+    "http://fbac9e09.ngrok.io->localhost:9200",
+    "https://27b7e2a3.ngrok.io->localhost:8000",
+    "https://aadba8c3.ngrok.io->localhost:5601",
+    "https://e764668f.ngrok.io/?token=6298145616b1878cbe7db48af0f91d4098c50899fa583a07&token=6298145616b1878cbe7db48af0f91d4098c50899fa583a07->localhost:8888",
+    "https://fbac9e09.ngrok.io->localhost:9200"
+]

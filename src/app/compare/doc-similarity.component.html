@@ -1,0 +1,40 @@
+<div class="container-fluid">
+    <ng-container>
+
+        <p *ngFor="let section of docSections">
+            <span class="badge badge-secondary">Paragraph {{section.sectionId}}</span>
+            <span class="badge badge-warning">{{section.simStats.max | number:'1.1-2'}}</span>
+            <ng-container *ngFor="let sent of section.sents">
+
+                <div *ngIf="sent.label === 'none';then none else highlight">
+                </div>
+                <ng-template #none>
+                    {{sent.text}}
+                </ng-template>
+                <ng-template #highlight>
+                    <u>
+                        <span>
+                            <strong>
+                                {{sent.text}}
+                                <span class="badge badge-info">{{sent.similarity | number:'1.1-2'}}</span>
+                            </strong>
+                        </span>
+                    </u>
+                </ng-template>
+                <!--
+        <span class="badge badge-info">{{sent.sentId}}</span>
+        <u>
+            <span>
+                <strong>{{section[1]}}</strong>
+            </span>
+        </u>
+        <span>{{section[2]}}</span>
+    -->
+
+            </ng-container>
+
+        </p>
+
+    </ng-container>
+
+</div>

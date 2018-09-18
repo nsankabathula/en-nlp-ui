@@ -26,6 +26,8 @@ import { SectionTextComponent } from 'src/app/compare/section-text.component';
 import { ModalContent } from 'src/app/common/modal-content.component';
 import { Doc2VecTrainingComponent } from 'src/app/compare/training.d2v.component';
 import { EntityModalContent, EntityStyleDirective } from 'src/app/compare/entity.component';
+import { DocSimilarityComponent } from 'src/app/compare/doc-similarity.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 
 @NgModule({
@@ -40,7 +42,8 @@ import { EntityModalContent, EntityStyleDirective } from 'src/app/compare/entity
     ModalContent,
     Doc2VecTrainingComponent,
     EntityModalContent,
-    EntityStyleDirective
+    EntityStyleDirective,
+    DocSimilarityComponent
   ],
   imports: [
     BrowserModule,
@@ -51,6 +54,7 @@ import { EntityModalContent, EntityStyleDirective } from 'src/app/compare/entity
     FormsModule,
     ReactiveFormsModule,
     Ng5SliderModule,
+    BrowserAnimationsModule,
 
 
   ],

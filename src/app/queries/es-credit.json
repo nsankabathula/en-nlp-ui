@@ -1,0 +1,155 @@
+{
+    "getSimBySection": {
+        "aggs": {
+            "name": {
+                "terms": {
+                    "field": "name.keyword",
+                    "size": 100,
+                    "order": {
+                        "_key": "asc"
+                    }
+                },
+                "aggs": {
+                    "section": {
+                        "terms": {
+                            "field": "sectionId",
+                            "size": 50,
+                            "order": {
+                                "maxSim": "desc"
+                            }
+                        },
+                        "aggs": {
+                            "maxSim": {
+                                "max": {
+                                    "field": "similarity"
+                                }
+                            },
+                            "minSim": {
+                                "min": {
+                                    "field": "similarity"
+                                }
+                            },
+                            "sims": {
+                                "top_hits": {
+                                    "docvalue_fields": [
+                                        {
+                                            "field": "similarity",
+                                            "format": "use_field_mapping"
+                                        }
+                                    ],
+                                    "_source": "similarity",
+                                    "size": 10,
+                                    "sort": [
+                                        {
+                                            "similarity": {
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "sectionText": {
+                                "top_hits": {
+                                    "_source": "sectionText",
+                                    "size": 1,
+                                    "sort": [
+                                        {
+                                            "similarity": {
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "sents": {
+                                "top_hits": {
+                                    "docvalue_fields": [
+                                        {
+                                            "field": "sentId",
+                                            "format": "use_field_mapping"
+                                        }
+                                    ],
+                                    "_source": "sentId",
+                                    "size": 10,
+                                    "sort": [
+                                        {
+                                            "similarity": {
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "startChar": {
+                                "top_hits": {
+                                    "docvalue_fields": [
+                                        {
+                                            "field": "startChar",
+                                            "format": "use_field_mapping"
+                                        }
+                                    ],
+                                    "_source": "startChar",
+                                    "size": 10,
+                                    "sort": [
+                                        {
+                                            "similarity": {
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "endChar": {
+                                "top_hits": {
+                                    "docvalue_fields": [
+                                        {
+                                            "field": "endChar",
+                                            "format": "use_field_mapping"
+                                        }
+                                    ],
+                                    "_source": "endChar",
+                                    "size": 10,
+                                    "sort": [
+                                        {
+                                            "similarity": {
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "size": 0,
+        "_source": {
+            "excludes": []
+        },
+        "stored_fields": [
+            "*"
+        ],
+        "script_fields": {},
+        "docvalue_fields": [],
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "match_all": {}
+                    }
+                ],
+                "filter": {
+                    "range": {
+                        "similarity": {
+                            "gte": 0.4,
+                            "lte": 0.9
+                        }
+                    }
+                },
+                "should": [],
+                "must_not": []
+            }
+        }
+    }
+}

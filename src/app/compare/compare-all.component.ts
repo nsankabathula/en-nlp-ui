@@ -5,7 +5,7 @@ import { forkJoin } from "rxjs";
 import { error } from 'util';
 import { FileItem } from 'src/app/models/model';
 import { FileSection } from 'src/app/models/compare.models';
-import { IESError, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, IFileMeta, IFile, IFileSection, ISentSimilarity, IStat, IEntity } from 'src/app/models/es.model';
+import { IESError, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, IFileMeta, IFile, IFileSection, ISentSimilarity, IStat, IEntity, IFileSectionMeta, Score } from 'src/app/models/es.model';
 import { CreditEsService } from 'src/app/services/es-credit.service';
 import { Options, LabelType, ChangeContext, PointerType } from 'ng5-slider';
 import { PyService } from 'src/app/services/python.service';
@@ -26,6 +26,10 @@ export class CompareAllComponent {
     similartityStats: IStat = null;
     fileMetaData: Array<IFileMeta> = []
     sentSimDoc: Array<ISentSimilarity> = [];
+    DocSimilarities: Array<IFile> = []
+    INDEX: string = "";
+
+    SCORE = Score;
 
     sliderOptions: Options = {
         floor: -1,
@@ -35,10 +39,11 @@ export class CompareAllComponent {
         minRange: .3,
         maxRange: .8,
         pushRange: true,
-        rightToLeft: true,
+        rightToLeft: false,
         showTicks: true,
         translate: (value: number, label: LabelType): string => {
-            return (Math.round(value * 100) / 100).toString();
+            //console.log("translate", value)
+            return ((value !== null && value !== undefined) ? Math.round(value * 100) / 100 : 0).toString();
         }
     };
     @ViewChild('showDocModal')
@@ -50,43 +55,60 @@ export class CompareAllComponent {
         this.csService.getFileMetadata().subscribe((res: Array<IFileMeta>) => {
             //console.log("getFileMetadata", res)
             this.fileMetaData = res;
+            const doc = this.fileMetaData[0]
+            this.getFileSections(doc)
+            //this.showSimilarityForSection(doc, doc.sections[0]);
         })
 
-        //this.updateSimilarity();
+
+
+
 
 
 
     }
-    callPythonScript(section: IFileSection) {
-        this.pythonSvc.callDoc2Vec(section.text).subscribe((pyResult: any) => {
+    callPythonScript(section: IFileSection, doc: IFileMeta) {
+        //const index = doc.name.toLowerCase() + "_" + section.sectionId.toString()
+        const index = section.index;
+        this.pythonSvc.callDoc2Vec(section, doc.name, index).subscribe((pyResult: any) => {
             console.log("PyResult", pyResult)
-            this.updateSimilarity();
+            this.updateSimilarity(index);
         });
     }
 
-    showSimilarityResult() {
-        this.updateSimilarity();
+    showSimilarityResult(index: string = "credit") {
+        this.updateSimilarity(index);
     }
 
-    updateSimilarity() {
-        this.csService.getSimilarityStats().subscribe(
+    showSimilarityForSection(doc: IFileMeta, section: IFileSectionMeta) {
+        //const index = doc.name.toLowerCase() + "_" + section.sectionId.toString()
+        console.log("showSimilarityForSection", section, doc)
+        const index = doc.name + "_" + section.sectionId
+
+        this.fetchDocSimilarities(-1, 1, index);
+    }
+
+    updateSimilarity(index: string = "credit") {
+        this.INDEX = index;
+        this.csService.getSimilarityStats(index).subscribe(
             (result: IStat) => {
                 this.similartityStats = result;
+                const max = (this.similartityStats.max) ? this.similartityStats.max : 1
+                const min = (this.similartityStats.min) ? this.similartityStats.min : -1
+                this.sliderOptions.minLimit = min;
+                this.sliderOptions.maxLimit = max;
+                this.sliderOptions.floor = min;
+                this.sliderOptions.ceil = max;
 
-                this.sliderOptions.minLimit = this.similartityStats.min;
-                this.sliderOptions.maxLimit = this.similartityStats.max;
-                this.sliderOptions.floor = this.similartityStats.min;
-                this.sliderOptions.ceil = this.similartityStats.max;
+                this.similartityStats.minValue = max / 2;
+                this.similartityStats.maxValue = max;
 
-                this.similartityStats.minValue = this.similartityStats.max / 2;
-                this.similartityStats.maxValue = this.similartityStats.max;
-
-                this.sliderOptions.maxRange = this.sliderOptions.step * 5
+                this.sliderOptions.maxRange = this.sliderOptions.step * 10
                 this.sliderOptions.minRange = this.sliderOptions.step;
 
                 console.log(this.similartityStats);
                 if (this.similartityStats) {
-                    this.fetchDocSimilarities(this.similartityStats.minValue, this.similartityStats.maxValue);
+                    this.fetchDocSimilarities(this.similartityStats.minValue, this.similartityStats.maxValue, index);
                 }
             }
         )
@@ -118,17 +140,27 @@ export class CompareAllComponent {
 
     }
 
-    fetchDocSimilarities(minValue: number, maxValue: number) {
-        this.csService.getDocSimilarities(minValue, maxValue).subscribe(
+    fetchDocSimilarities(minValue: number, maxValue: number, index: string = "credit") {
+        /*
+                this.csService.getSimBySection(minValue, maxValue, index).subscribe((response: Array<IFile>) => {
+                    this.DocSimilarities = response;
+                }, ((error) => { console.error(error) }), () => {
+                    console.log("fetchDocSimilarities", this.DocSimilarities);
+                })
+        */
+
+        this.csService.getDocSimilarities(index, minValue, maxValue).subscribe(
             (result) => {
-                //console.log("fetchDocSimilarities", result);
+                console.log("fetchDocSimilarities", result);
                 this.documentSimilarities = result;
                 this.documentSimilarities = this.documentSimilarities.map((value: ISentSimilarity) => {
+                    value.sectionText = value.words.join(" ");
                     value.isCollapsed = true;
                     return value;
                 });
 
             })
+
     }
 
     onUserChangeStart(changeContext: ChangeContext): void {
@@ -145,12 +177,13 @@ export class CompareAllComponent {
     }
 
     getChangeContextString(changeContext: ChangeContext): void {
-        this.fetchDocSimilarities(changeContext.value, changeContext.highValue)
+        this.fetchDocSimilarities(changeContext.value, changeContext.highValue, this.INDEX)
 
     }
 
     showDoc(doc: ISentSimilarity) {
-        this.csService.getDocSimilarity(doc.name).subscribe(
+        console.log("showDoc", doc)
+        this.csService.getDocSimilarity(doc.name, doc.query.index).subscribe(
             (res: Array<ISentSimilarity>) => {
                 this.sentSimDoc = res;
 
@@ -172,9 +205,11 @@ export class CompareAllComponent {
 
     }
 
-    toggleScore(sent: ISentSimilarity) {
-        sent.score = (sent.score > 0) ? 0 : 1;
-        this.csService.updateScore(sent).subscribe((result: any) => {
+    toggleScore(sent: ISentSimilarity, score: Score = Score.NOTMATCH) {
+
+        sent.target = score
+
+        this.csService.updateTarget(sent, sent.query.index).subscribe((result: any) => {
             console.log(result);
         })
     }

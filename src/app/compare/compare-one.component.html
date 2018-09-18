@@ -1,3 +1,48 @@
-<div>
-    <h4>{{title}}</h4>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3">
+            <div ngbDropdown class="d-inline-block">
+                <button [ngClass]="{'btn':true, 'btn-outline-primary' : true}" ngbDropdownToggle>Documents </button>
+                <div ngbDropdownMenu>
+
+                    <div *ngFor="let file of fileMetaData">
+                        <button class="dropdown-item" (click)="showSimilarity(file)">{{file.name}} ({{file.sectionCount}}/{{file.sentCount}}) </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <!--
+            <button class="btn btn-link" (click)="showSimilarityResult()" aria-expanded="false">
+                Show Similarity
+            </button>
+        -->
+        </div>
+        <div class="col-sm-3" *ngIf="similartityStats">
+            <div class="custom-slider">
+                <ng5-slider [(value)]="similartityStats.minValue" [(highValue)]="similartityStats.maxValue" (userChangeStart)="onUserChangeStart($event)"
+                    (userChange)="onUserChange($event)" (userChangeEnd)="onUserChangeEnd($event)" [options]="sliderOptions"></ng5-slider>
+            </div>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="container-fluid" #showDocModal *ngIf="SentSimDoc && SentSimDoc.length>0">
+            <p>{{SentSimDoc[0].name}}</p>
+            <p>{{SentSimDoc[0].query}}</p>
+            <p *ngFor="let sent of SentSimDoc">
+                <span class="badge badge-secondary">{{sent.sectionId}}</span>
+                <span class="badge badge-light">{{sent.sectionText.substring(0,30)}} ... {{sent.sectionText.substring(sent.sectionText.length-30)}}</span>
+                <br/>
+                <span class="badge badge-info">{{sent.similarity}}</span>
+                {{sent.sentText}}
+
+                <button class="btn btn-sm btn-secondary" aria-expanded="false" (click)="toggleScore(sent)">
+                    Score ({{sent.score}})
+                </button>
+
+            </p>
+        </div>
+    </div>
 </div>

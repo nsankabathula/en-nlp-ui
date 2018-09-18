@@ -12,18 +12,21 @@
                 </div>
             </div>
         </div>
+        <!--
         <div class="col-sm-3">
             <button class="btn btn-link" (click)="showSimilarityResult()" aria-expanded="false">
                 Show Similarity
             </button>
         </div>
+    -->
+        <!--
         <div class="col-sm-3" *ngIf="similartityStats">
             <div class="custom-slider">
                 <ng5-slider [(value)]="similartityStats.minValue" [(highValue)]="similartityStats.maxValue" (userChangeStart)="onUserChangeStart($event)"
                     (userChange)="onUserChange($event)" (userChangeEnd)="onUserChangeEnd($event)" [options]="sliderOptions"></ng5-slider>
             </div>
 
-        </div>
+        </div>-->
     </div>
     <div class="row">
         <!--<div class="col-sm-4">
@@ -38,12 +41,19 @@
 
                             <button class="btn btn-link" data-toggle="collapse" (click)="section.isCollapsed = !section.isCollapsed" aria-expanded="false"
                                 aria-controls="collapseOne">
-                                Section {{section.sectionId}}: {{section.text.substring(0, 25)}} ...
+                                <span class="badge badge-secondary">Paragraph {{section.sectionId}}</span> {{section.text.substring(0, 25)}} ...
                             </button>
 
-                            <button class="btn btn-sm btn-primary" aria-expanded="false" (click)="callPythonScript(section)">
-                                Find Similar Sections
+
+                            <button class="btn btn-sm btn-primary" aria-expanded="false" (click)="showSimilarityForSection(document, section )">
+                                Results
                             </button>
+                            <!--
+                            <button class="btn btn-sm btn-seconday" aria-expanded="false" (click)="callPythonScript(section, selectedFileMeta)">
+                                Find Similar Sections
+                            </button>-->
+
+
                             <button class="btn btn-sm btn-info" aria-expanded="false" (click)="showEntityModal(section)">
                                 NER
                             </button>
@@ -60,9 +70,43 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-sm-6" *ngIf="DocSimilarities && DocSimilarities.length>0">
+            <div class="container-fluid">
+                <p>
+                    <!--<span class="badge badge-secondary">{{DocSimilarities[0].query.name}}</span>-->
+                    <span class="badge badge-secondary">Paragraph {{DocSimilarities[0].query.sectionId}}</span>
+                    {{DocSimilarities[0].query.text}}
+
+                </p>
+
+                <div class="row" *ngFor="let doc of  DocSimilarities">
+                    <div class="card">
+                        <div class="card-header" [id]="doc.name">
+                            <button class="btn btn-link" data-toggle="collapse" (click)="doc.isCollapsed = !doc.isCollapsed" aria-expanded="false" aria-controls="collapseOne">
+                                {{doc.name}}
+                                <span class="badge badge-info">{{doc.simStats.min | number:'1.1-2'}}</span> -
+                                <span class="badge badge-info">{{doc.simStats.max | number:'1.1-2'}}</span>
+
+                            </button>
+                            <button class="btn btn-info btn-sm" (click)="showDoc(doc)">Show Doc</button>
+                        </div>
+                        <div [id]="doc.name" [ngbCollapse]="doc.isCollapsed" aria-labelledby="headingOne" data-parent="#accordion">
+
+                            <div class="card-body">
+
+                                <app-doc-similarity [doc]="doc"></app-doc-similarity>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="col-sm-6" *ngIf="documentSimilarities && documentSimilarities.length>0">
             <div class="container-fluid">
-                <span>{{documentSimilarities[0].query}}</span>
+                <span>{{documentSimilarities[0].query.text}}</span>
                 <div class="row" *ngFor="let doc of  documentSimilarities">
                     <div class="card">
                         <div class="card-header" [id]="doc.sectionId">
@@ -70,10 +114,22 @@
 
                             <button class="btn btn-link" data-toggle="collapse" (click)="doc.isCollapsed = !doc.isCollapsed" aria-expanded="false" aria-controls="collapseOne">
                                 {{doc.name}}
-                                <span class="badge badge-info">{{doc.similarity}}</span>
+                                <!--<span class="badge badge-info">{{doc.similarity}}</span>-->
 
                             </button>
-                            <button class="btn btn-info btn-sm" (click)="showDoc(doc)">Show Doc</button>
+                            <button class="btn btn-primary btn-sm" (click)="showDoc(doc)">
+                                <i class="material-icons md-18">
+                                    text_format
+                                </i>
+                            </button>
+                            <button class="btn btn-primary btn-sm" (click)="showDoc(doc)">
+                                <i class="material-icons md-18">
+                                    picture_as_pdf
+                                </i>
+                            </button>
+
+
+
 
                         </div>
                         <div [id]="doc.sectionId" [ngbCollapse]="doc.isCollapsed" aria-labelledby="headingOne" data-parent="#accordion">
@@ -87,13 +143,24 @@
                                     <span class="badge badge-info">{{doc.sentId}}</span>
                                 
                                 </div>
-                            </div> -->
+                            </div> 
 
 
                             <div class="card-body">
                                 <app-section-similarity [data]="doc"></app-section-similarity>
+                            </div>-->
+                            <div class="card-body">
+                                <span class="badge badge-info">PRE-PROCESSED</span>
+                                {{doc.sectionText}}
+                                <br/>
+                                <br/>
+                                <span class="badge badge-info">MATCHED</span>
+                                {{doc.sentText}}
+                                <br/>
+                                <span class="badge badge-warning">RANK# {{doc.rank}} </span>
+                                <span class="badge badge-warning">TOTAL# {{doc.docCount}} </span>
+                                <span class="badge badge-warning">SIMILARITY# {{doc.sentSimilarity | number : '1.1-3' }} </span>
                             </div>
-
 
                         </div>
                     </div>
@@ -105,15 +172,28 @@
 
 </div>
 <ng-template #showDocModal *ngIf="sentSimDoc && sentSimDoc.length>0">
-    <p>{{sentSimDoc[0].query}}</p>
-    <p *ngFor="let sent of sentSimDoc">
-        <span class="badge badge-secondary">{{sent.sectionId}}</span>
+    <p>{{sentSimDoc[0].query.text}}</p>
+    <div *ngFor="let sent of sentSimDoc">
+
+        <span class="badge badge-secondary">Paragraph {{sent.sectionId}}</span>
         <span class="badge badge-light">{{sent.sectionText.substring(0,30)}} ... {{sent.sectionText.substring(sent.sectionText.length-30)}}</span>
         <br/> {{sent.sentText}}
-        <span class="badge badge-info">{{sent.similarity}}</span>
+        <span class="badge badge-info">{{sent.similarity | number : '1.1-3'}}</span>
+        <!--
         <button class="btn btn-sm btn-info" aria-expanded="false" (click)="toggleScore(sent)">
             Toggle Score({{sent.score}})
-        </button>
+        </button-->
+        <div ngbDropdown class="d-inline-block">
+            <button class="btn btn-outline-primary btn-sm" ngbDropdownToggle>Score {{SCORE[sent.target]}}</button>
+            <div ngbDropdownMenu>
+                <button class="dropdown-item btn-sm" (click)="toggleScore(sent, SCORE.MATCH)">{{SCORE[SCORE.MATCH]}}</button>
+                <button class="dropdown-item btn-sm" (click)="toggleScore(sent, SCORE.MODERATE_MATCH)">{{SCORE[SCORE.MODERATE_MATCH]}}</button>
+                <button class="dropdown-item btn-sm" (click)="toggleScore(sent, SCORE.NOTMATCH)">{{SCORE[SCORE.NOTMATCH]}}</button>
+                <!--<button class="dropdown-item btn-sm" (click)="toggleScore(sent, SCORE.FALSE_POSITIVE)">{{SCORE[SCORE.FALSE_POSITIVE]}}</button>
+                <button class="dropdown-item btn-sm" (click)="toggleScore(sent, SCORE.FALSE_NEGATIVE)">{{SCORE[SCORE.FALSE_NEGATIVE]}}</button>
+                -->
+            </div>
+        </div>
 
-    </p>
+    </div>
 </ng-template>
