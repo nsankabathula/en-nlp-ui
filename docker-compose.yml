@@ -3,7 +3,7 @@ version: '2'
 services:
   nlp-demo:
     image: nsankabathula/nlp-demo:latest
-    container_name: nlp-demo-docker
+    container_name: nlp-demo-container
     build:
       context: .
       dockerfile: Dockerfile
