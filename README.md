@@ -10,13 +10,13 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 ## Docker
 
 ### Build Image
-docker build -t <<username>>/<<app-name>> .
+docker build -t username/app-name .
 
 ### Run Image
-docker run -p 4200:4200 -d <username>/<app-name>
+docker run -p 4200:4200 -d username/app-name
 
 ### Enter the container
-$ docker exec -it <container_id> /bin/bash
+$ docker exec -it container_id /bin/bash
 
 
 
