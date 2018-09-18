@@ -19,4 +19,4 @@ docker run -p 4200:4200 -d username/app-name
 $ docker exec -it container_id /bin/bash
 
 
-
+docker run -it -v ${PWD}:/usr/src/app -v /usr/src/app/node_modules -p 4200:4200 --rm nsankabathula/nlp-demo

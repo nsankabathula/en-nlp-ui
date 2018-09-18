@@ -1,8 +1,8 @@
-version: '3.5'
+version: '2'
 
 services:
-
-  nsankabathula/nlp-demo:
+  nlp-demo:
+    image: nsankabathula/nlp-demo:latest
     container_name: nlp-demo-docker
     build:
       context: .
