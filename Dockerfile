@@ -1,4 +1,4 @@
-FROM node:9.11.1
+FROM node:9.11.1 as node
 
 # set working directory
 RUN mkdir /usr/src/app
