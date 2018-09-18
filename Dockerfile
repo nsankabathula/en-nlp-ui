@@ -9,7 +9,7 @@ ENV PATH /usr/src/app/node_modules/.bin:$PATH
 COPY package.json /usr/src/app/package.json
 
 RUN npm install
-# RUN npm install -g @angular/cli@6.0.0
+RUN npm install -g @angular/cli@latest
 
 COPY . /usr/src/app
 
