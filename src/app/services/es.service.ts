@@ -91,7 +91,7 @@ export class CoreEsService implements IEsService, ISearch {
     }
 
     public find<T>(index, docType, body, filter, useTemplate: boolean = false): Observable<Array<T>> {
-        return this._search<IESSearchResult<T>>(index, docType, body, filter, useTemplate).pipe(
+        return this._search<T>(index, docType, body, filter, useTemplate).pipe(
             map(
                 (result: IESSearchResult<T>) => {
                     return result.hits.hits.map((hit: IHit<T>) => {
