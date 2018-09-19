@@ -174,13 +174,13 @@ export class CompareAllComponent {
                     value.isCollapsed = true;
                     value.rank = value.rank + 1
                     value.confidence = ((value.rank / value.docCount) * 100)
-                    value.status = MatchStatus[(value.confidence < MATCH_BREAKS.MATCH) ? MatchStatus.MATCH : ((value.confidence > MATCH_BREAKS.NOTMATCH) ? MatchStatus.NOTMATCH : MatchStatus.GREY)]
-                    console.log(MatchStatus[MatchStatus.MATCH.toString()])
+                    value.status = MatchStatus[(value.confidence < MATCH_BREAKS.MATCH) ? MatchStatus.MATCH : ((value.confidence > MATCH_BREAKS.NOTMATCH) ? MatchStatus.NOTMATCH : MatchStatus.UKNOWN)]
+
                     value.confidence = (MatchStatus[MatchStatus.MATCH] == value.status) ? 100 - value.confidence : value.confidence;
                     value.style = {
                         background:
                             (value.status == MatchStatus[MatchStatus.MATCH]) ? "linear-gradient(to bottom, #33ccff" + value.confidence + "%, #33cc33 100%)" :
-                                "linear-gradient(to bottom, #33ccff 0%, #ccff33" + + value.confidence + "%)"
+                                "linear-gradient(to bottom, #33ccff 0%, #ccff33" + value.confidence + "%)"
 
                     }
                     value.clazz = StatusBadge[value.status]
@@ -225,13 +225,11 @@ export class CompareAllComponent {
 
     showFile(fileName: string, fileType: string = "pdf") {
         console.info("showfile", fileName, fileType);
-        /*this.pythonSvc.downloadFile("creditcardagreement_117.txt", "text/plain").subscribe((res) => {
-            console.log(res);
-        })
-        */
+        if (fileType === "pdf") {
+            fileName = fileName.split(".")[0] + ".pdf"
+        }
 
-        //var window: Window;
-        //window.location.href = this.pythonSvc.downloadUrl("creditcardagreement_117.txt")
+
         window.open(this.pythonSvc.downloadUrl(fileName), fileName);
 
 

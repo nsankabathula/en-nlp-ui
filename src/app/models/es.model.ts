@@ -199,12 +199,12 @@ export const MATCH_BREAKS = {
 }
 export enum StatusBadge {
     MATCH = "badge badge-primary",
-    GREY = "badge badge-warning",
+    UKNOWN = "badge badge-warning",
     NOTMATCH = "badge badge-success"
 }
 export enum MatchStatus {
     MATCH,
-    GREY,
+    UKNOWN,
     NOTMATCH
 }
 export interface ISentSimilarity {
