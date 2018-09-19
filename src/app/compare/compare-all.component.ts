@@ -96,8 +96,18 @@ export class CompareAllComponent {
         this.updateSimilarity(index);
     }
 
+    closeAllExcept(section: IFileSectionMeta) {
+        this.document.sections.forEach((fileSec: IFileSection) => {
+            fileSec.isCollapsed = section.sectionId !== fileSec.sectionId
+
+        })
+    }
+
     showSimilarityForSection(doc: IFileMeta, section: IFileSectionMeta) {
         //const index = doc.name.toLowerCase() + "_" + section.sectionId.toString()
+
+        this.closeAllExcept(section)
+
         console.log("showSimilarityForSection", section, doc)
         const index = doc.name + "_" + section.sectionId
 
@@ -184,9 +194,11 @@ export class CompareAllComponent {
 
                     }
                     value.clazz = StatusBadge[value.status]
+                    value.shortName = value.name.substring(5, 20) + ".." + value.name.substring(value.name.length - 4)
 
                     return value;
                 });
+                this.documentSimilarities[0].isCollapsed = false;
 
             })
 

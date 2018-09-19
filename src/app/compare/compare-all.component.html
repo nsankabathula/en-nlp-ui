@@ -1,5 +1,6 @@
 <div class="container-fluid">
     <div class="row">
+        <!--
         <div class="col-sm-3">
             <div ngbDropdown class="d-inline-block">
                 <button [ngClass]="{'btn':true, 'btn-outline-primary' : true}" ngbDropdownToggle>Documents </button>
@@ -15,10 +16,28 @@
 
 
         </div>
-        <div class="col-sm-1" *ngIf="selectedFileMeta">
+        <div class="col-sm-4" *ngIf="selectedFileMeta">
+
             <span class="badge badge-info">
-                <h6>{{selectedFileMeta.name}}</h6>
+                {{selectedFileMeta.name}}
             </span>
+        </div>-->
+        <div class="col-sm-5">
+            <div class="btn-group" role="group" aria-label="target button group">
+                <button class="btn btn-secondary btn-info">
+                    {{selectedFileMeta.name}}
+                </button>
+                <button class="btn btn-secondary btn-sm" (click)="showFile(selectedFileMeta.name, 'txt')">
+                    <i class="material-icons md-18">
+                        text_format
+                    </i>
+                </button>
+                <button class="btn btn-secondary btn-sm" (click)="showFile(selectedFileMeta.name, 'pdf')">
+                    <i class="material-icons md-18">
+                        picture_as_pdf
+                    </i>
+                </button>
+            </div>
         </div>
         <!--
         <div class="col-sm-3">
@@ -61,11 +80,6 @@
                                         <button class="btn btn-sm btn-secondary" aria-expanded="false" (click)="showSimilarityForSection(document, section )">
                                             Results
                                         </button>
-                                        <!--
-                                                                <button class="btn btn-sm btn-seconday" aria-expanded="false" (click)="callPythonScript(section, selectedFileMeta)">
-                                                                    Find Similar Sections
-                                                                </button>-->
-
 
                                         <button class="btn btn-sm btn-secondary" aria-expanded="false" (click)="showEntityModal(section)">
                                             NER
@@ -131,16 +145,19 @@
 
         <div class="col-sm-6" *ngIf="documentSimilarities && documentSimilarities.length>0">
             <div class="container-fluid pre-scrollable" [style.max-height.px]="leftDivHeight">
-                <div class="row">
+                <!-- <div class="row">
                     <span>{{documentSimilarities[0].query.text}}</span>
                 </div>
+            -->
                 <div class="row" *ngFor="let doc of  documentSimilarities">
                     <div class="card" style="width: 100%">
                         <div class="card-header" [id]="doc.sectionId">
                             <div class="row">
                                 <div class="col-sm-7">
-                                    <button class="btn btn-link" data-toggle="collapse" (click)="doc.isCollapsed = !doc.isCollapsed" aria-expanded="false" aria-controls="collapseOne">
-                                        {{doc.name}}
+                                    <button class="btn btn-link" data-toggle="collapse" (click)="doc.isCollapsed = !doc.isCollapsed" aria-expanded="false" aria-controls="collapseOne"
+                                        [title]="doc.name">
+                                        {{doc.shortName }}
+
                                     </button>
                                 </div>
                                 <div class="col-sm-3">
@@ -173,8 +190,8 @@
 
                             <div class="card-body">
 
-                                <span class="badge badge-info">RELEVANT MATCH</span>
-                                {{doc.sectionText}}
+                                <!--<span class="badge badge-info">RELEVANT MATCH</span>-->
+                                {{doc.sentText}}
                                 <br/>
 
 

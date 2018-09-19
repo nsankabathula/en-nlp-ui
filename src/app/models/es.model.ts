@@ -232,6 +232,7 @@ export interface ISentSimilarity {
     status: string
     style: any
     clazz: any
+    shortName: string
 
 }
 
