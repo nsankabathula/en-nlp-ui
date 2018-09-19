@@ -18,12 +18,12 @@ const process = function (SERVER_CONFIG): Array<any> {
     });
     return configs;
 }
+const SERVER_CONFIGS: Array<any> = process(require('./server.json'));
 
-const SERVER_CONFIGS: Array<any> = process(require('src/app/config/server.json'));
+export class Helper {
 
-export class ConfigService {
 
-    static getServer(port: string, protocol: string = "http"): string {
+    public static server(port: string, protocol: string = "http"): string {
         const configs = SERVER_CONFIGS.filter((config) => {
             return config.protocol === protocol && config.port === port
         });
@@ -31,12 +31,8 @@ export class ConfigService {
         return configs[0].public
     }
 
+    public static process = process;
 
-
-    static getAll(): Array<any> {
-
-        return SERVER_CONFIGS;
-    }
-
+    public static configs = SERVER_CONFIGS;
 
 }

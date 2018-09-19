@@ -11,6 +11,14 @@
 
                 </div>
             </div>
+
+
+
+        </div>
+        <div class="col-sm-1" *ngIf="selectedFileMeta">
+            <span class="badge badge-info">
+                <h6>{{selectedFileMeta.name}}</h6>
+            </span>
         </div>
         <!--
         <div class="col-sm-3">
@@ -28,35 +36,45 @@
 
         </div>-->
     </div>
-    <div class="row">
+    <div class="row" style="height: 100%">
         <!--<div class="col-sm-4">
             {{document.text}}
         </div>-->
-        <div class="col-sm-6" *ngIf="selectedFileMeta && document && document.sections">
-            <div class="container-fluid">
-                <span class="badge badge-info">{{selectedFileMeta.name}}</span>
+        <div class="col-sm-4 " *ngIf="selectedFileMeta && document && document.sections">
+            <!-- <span class="badge badge-info">{{selectedFileMeta.name}}</span>-->
+            <div data-spy="scroll" class="container-fluid pre-scrollable" [style.max-height.px]="leftDivHeight">
+
                 <div class="row" *ngFor="let section of  document.sections">
-                    <div class="card">
+                    <div class="card" style="width: 100%">
                         <div class="card-header" [id]="section.sectionId">
-
-                            <button class="btn btn-link" data-toggle="collapse" (click)="section.isCollapsed = !section.isCollapsed" aria-expanded="false"
-                                aria-controls="collapseOne">
-                                <span class="badge badge-secondary">Paragraph {{section.sectionId}}</span> {{section.text.substring(0, 25)}} ...
-                            </button>
-
-
-                            <button class="btn btn-sm btn-primary" aria-expanded="false" (click)="showSimilarityForSection(document, section )">
-                                Results
-                            </button>
-                            <!--
-                            <button class="btn btn-sm btn-seconday" aria-expanded="false" (click)="callPythonScript(section, selectedFileMeta)">
-                                Find Similar Sections
-                            </button>-->
+                            <div class="row">
+                                <div class="col-sm-9">
+                                    <button class="btn btn-link" data-toggle="collapse" (click)="section.isCollapsed = !section.isCollapsed" aria-expanded="false"
+                                        aria-controls="collapseOne">
+                                        <span class="badge badge-secondary">Paragraph {{section.sectionId}}</span> {{section.text.substring(0, 25)}} ...
+                                    </button>
+                                </div>
+                                <div class="col-sm-2">
 
 
-                            <button class="btn btn-sm btn-info" aria-expanded="false" (click)="showEntityModal(section)">
-                                NER
-                            </button>
+                                    <div class="btn-group" role="group" aria-label="master button group">
+                                        <button class="btn btn-sm btn-secondary" aria-expanded="false" (click)="showSimilarityForSection(document, section )">
+                                            Results
+                                        </button>
+                                        <!--
+                                                                <button class="btn btn-sm btn-seconday" aria-expanded="false" (click)="callPythonScript(section, selectedFileMeta)">
+                                                                    Find Similar Sections
+                                                                </button>-->
+
+
+                                        <button class="btn btn-sm btn-secondary" aria-expanded="false" (click)="showEntityModal(section)">
+                                            NER
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+
 
 
                         </div>
@@ -71,95 +89,85 @@
             </div>
         </div>
 
-        <div class="col-sm-6" *ngIf="DocSimilarities && DocSimilarities.length>0">
+        <div class="col-sm-8" *ngIf="DocSimilarities && DocSimilarities.length>0">
             <div class="container-fluid">
-                <p>
-                    <!--<span class="badge badge-secondary">{{DocSimilarities[0].query.name}}</span>-->
-                    <span class="badge badge-secondary">Paragraph {{DocSimilarities[0].query.sectionId}}</span>
-                    {{DocSimilarities[0].query.text}}
+                <div class="row">
+                    <p>
+                        <!--<span class="badge badge-secondary">{{DocSimilarities[0].query.name}}</span>-->
+                        <span class="badge badge-secondary">Paragraph {{DocSimilarities[0].query.sectionId}}</span>
+                        {{DocSimilarities[0].query.text}}
 
-                </p>
+                    </p>
+                </div>
+                <div class="row" style="width: 100%">
+                    <div class="row" *ngFor="let doc of  DocSimilarities" style="width: 100%">
+                        <div id="#test" class="card" style="width: 100%">
+                            <div class="card-header" [id]="doc.name">
+                                <button class="btn btn-link" data-toggle="collapse" (click)="doc.isCollapsed = !doc.isCollapsed" aria-expanded="false" aria-controls="collapseOne">
+                                    {{doc.name}}
+                                    <span class="badge badge-info">{{doc.simStats.min | number:'1.1-2'}}</span> -
+                                    <span class="badge badge-info">{{doc.simStats.max | number:'1.1-2'}}</span>
 
-                <div class="row" *ngFor="let doc of  DocSimilarities">
-                    <div class="card">
-                        <div class="card-header" [id]="doc.name">
-                            <button class="btn btn-link" data-toggle="collapse" (click)="doc.isCollapsed = !doc.isCollapsed" aria-expanded="false" aria-controls="collapseOne">
-                                {{doc.name}}
-                                <span class="badge badge-info">{{doc.simStats.min | number:'1.1-2'}}</span> -
-                                <span class="badge badge-info">{{doc.simStats.max | number:'1.1-2'}}</span>
-
-                            </button>
-                            <button class="btn btn-info btn-sm" (click)="showDoc(doc)">Show Doc</button>
-                        </div>
-                        <div [id]="doc.name" [ngbCollapse]="doc.isCollapsed" aria-labelledby="headingOne" data-parent="#accordion">
-
-                            <div class="card-body">
-
-                                <app-doc-similarity [doc]="doc"></app-doc-similarity>
+                                </button>
+                                <button class="btn btn-info btn-sm" (click)="showDoc(doc)">Show Doc</button>
                             </div>
+                            <div [id]="doc.name" [ngbCollapse]="doc.isCollapsed" aria-labelledby="headingOne" data-parent="#accordion">
+
+                                <div class="card-body">
+
+                                    <app-doc-similarity [doc]="doc"></app-doc-similarity>
+                                </div>
 
 
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
         <div class="col-sm-6" *ngIf="documentSimilarities && documentSimilarities.length>0">
             <div class="container-fluid">
-                <span>{{documentSimilarities[0].query.text}}</span>
+                <div class="row">
+                    <span>{{documentSimilarities[0].query.text}}</span>
+                </div>
                 <div class="row" *ngFor="let doc of  documentSimilarities">
-                    <div class="card">
+                    <div class="card" style="width: 100%">
                         <div class="card-header" [id]="doc.sectionId">
-
-
                             <button class="btn btn-link" data-toggle="collapse" (click)="doc.isCollapsed = !doc.isCollapsed" aria-expanded="false" aria-controls="collapseOne">
                                 {{doc.name}}
                                 <!--<span class="badge badge-info">{{doc.similarity}}</span>-->
-
-                            </button>
-                            <button class="btn btn-primary btn-sm" (click)="showDoc(doc)">
-                                <i class="material-icons md-18">
-                                    text_format
-                                </i>
-                            </button>
-                            <button class="btn btn-primary btn-sm" (click)="showDoc(doc)">
-                                <i class="material-icons md-18">
-                                    picture_as_pdf
-                                </i>
+                                <span [ngClass]="doc.clazz">{{doc.status}} # {{doc.confidence | number : '1.1-2'}}% </span>
+                                <br>
+                                <!--<span class="badge badge-warning">RANK# {{doc.rank}} / {{doc.docCount}}</span>-->
                             </button>
 
+                            <div class="btn-group" role="group" aria-label="target button group">
+                                <button class="btn btn-secondary btn-sm" (click)="showFile(doc.name, 'text/plain')">
+                                    <i class="material-icons md-18">
+                                        text_format
+                                    </i>
+                                </button>
+                                <button class="btn btn-secondary btn-sm" (click)="showFile(doc.name, 'application/pdf')">
+                                    <i class="material-icons md-18">
+                                        picture_as_pdf
+                                    </i>
+                                </button>
+                            </div>
 
 
 
                         </div>
                         <div [id]="doc.sectionId" [ngbCollapse]="doc.isCollapsed" aria-labelledby="headingOne" data-parent="#accordion">
-                            <!-- <div class="card-body">
-                                {{doc.sectionText}}
-                                <br/>
-                                <span class="badge badge-info">{{doc.sectionId}}</span>
-                                <div class="card-body">
-                                    {{doc.sentText}}
-                                    <br/>
-                                    <span class="badge badge-info">{{doc.sentId}}</span>
-                                
-                                </div>
-                            </div> 
-
 
                             <div class="card-body">
-                                <app-section-similarity [data]="doc"></app-section-similarity>
-                            </div>-->
-                            <div class="card-body">
-                                <span class="badge badge-info">PRE-PROCESSED</span>
+
+                                <span class="badge badge-info">RELEVANT MATCH</span>
                                 {{doc.sectionText}}
                                 <br/>
-                                <br/>
-                                <span class="badge badge-info">MATCHED</span>
-                                {{doc.sentText}}
-                                <br/>
-                                <span class="badge badge-warning">RANK# {{doc.rank}} </span>
-                                <span class="badge badge-warning">TOTAL# {{doc.docCount}} </span>
-                                <span class="badge badge-warning">SIMILARITY# {{doc.sentSimilarity | number : '1.1-3' }} </span>
+
+
+
                             </div>
 
                         </div>

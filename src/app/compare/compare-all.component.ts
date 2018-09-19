@@ -1,22 +1,25 @@
-import { Component, Input, ViewChild, TemplateRef } from '@angular/core';
+import { Component, Input, ViewChild, TemplateRef, HostListener } from '@angular/core';
 
 import { Observable } from 'rxjs';
 import { forkJoin } from "rxjs";
 import { error } from 'util';
 import { FileItem } from 'src/app/models/model';
 import { FileSection } from 'src/app/models/compare.models';
-import { IESError, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, IFileMeta, IFile, IFileSection, ISentSimilarity, IStat, IEntity, IFileSectionMeta, Score } from 'src/app/models/es.model';
+import { IESError, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, IFileMeta, IFile, IFileSection, ISentSimilarity, IStat, IEntity, IFileSectionMeta, Score, MatchStatus, MATCH_BREAKS, StatusBadge } from 'src/app/models/es.model';
 import { CreditEsService } from 'src/app/services/es-credit.service';
 import { Options, LabelType, ChangeContext, PointerType } from 'ng5-slider';
 import { PyService } from 'src/app/services/python.service';
 import { NgbModal, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap/';
 import { ModalContent } from 'src/app/common/modal-content.component';
 import { EntityModalContent } from 'src/app/compare/entity.component';
+import { WindowRef } from 'src/app/services/window.service';
+
+declare let window;
 
 @Component({
     selector: 'app-compare-all',
     templateUrl: './compare-all.component.html',
-    styleUrls: ['./compare-all.component.scss']
+    styleUrls: ['./compare-all.component.scss', './compare-all.component.css']
 })
 export class CompareAllComponent {
 
@@ -28,6 +31,7 @@ export class CompareAllComponent {
     sentSimDoc: Array<ISentSimilarity> = [];
     DocSimilarities: Array<IFile> = []
     INDEX: string = "";
+    leftDivHeight: number = 880
 
     SCORE = Score;
 
@@ -49,24 +53,36 @@ export class CompareAllComponent {
     @ViewChild('showDocModal')
     private docModal: TemplateRef<any>;
 
-    constructor(private csService: CreditEsService, private pythonSvc: PyService, private modalSvc: NgbModal) {
+    constructor(private csService: CreditEsService, private pythonSvc: PyService, private modalSvc: NgbModal, private windowRef: WindowRef) {
 
 
         this.csService.getFileMetadata().subscribe((res: Array<IFileMeta>) => {
             //console.log("getFileMetadata", res)
             this.fileMetaData = res;
-            const doc = this.fileMetaData[0]
+            const doc = this.fileMetaData.find((value) => {
+                return value.name == "demo_master_visa_credit_card_agreement.txt"
+            })
             this.getFileSections(doc)
+            this.resetHeight()
+
             //this.showSimilarityForSection(doc, doc.sections[0]);
         })
 
 
-
-
-
-
-
     }
+
+    resetHeight() {
+        console.log("resetHeight", this.windowRef.nativeWindow.innerHeight)
+        this.leftDivHeight = this.windowRef.nativeWindow.innerHeight * .9
+        console.log("leftDivHeight", this.leftDivHeight)
+    }
+
+    @HostListener('window:resize')
+    onResize() {
+        // call our matchHeight function here later
+        this.resetHeight();
+    }
+
     callPythonScript(section: IFileSection, doc: IFileMeta) {
         //const index = doc.name.toLowerCase() + "_" + section.sectionId.toString()
         const index = section.index;
@@ -156,6 +172,19 @@ export class CompareAllComponent {
                 this.documentSimilarities = this.documentSimilarities.map((value: ISentSimilarity) => {
                     value.sectionText = value.words.join(" ");
                     value.isCollapsed = true;
+                    value.rank = value.rank + 1
+                    value.confidence = ((value.rank / value.docCount) * 100)
+                    value.status = MatchStatus[(value.confidence < MATCH_BREAKS.MATCH) ? MatchStatus.MATCH : ((value.confidence > MATCH_BREAKS.NOTMATCH) ? MatchStatus.NOTMATCH : MatchStatus.GREY)]
+                    console.log(MatchStatus[MatchStatus.MATCH.toString()])
+                    value.confidence = (MatchStatus[MatchStatus.MATCH] == value.status) ? 100 - value.confidence : value.confidence;
+                    value.style = {
+                        background:
+                            (value.status == MatchStatus[MatchStatus.MATCH]) ? "linear-gradient(to bottom, #33ccff" + value.confidence + "%, #33cc33 100%)" :
+                                "linear-gradient(to bottom, #33ccff 0%, #ccff33" + + value.confidence + "%)"
+
+                    }
+                    value.clazz = StatusBadge[value.status]
+
                     return value;
                 });
 
@@ -192,6 +221,18 @@ export class CompareAllComponent {
                 this.showModal(doc.name)
             }
         )
+    }
+
+    showFile(fileName: string, fileType: string = "pdf") {
+        console.info("showfile", fileName, fileType);
+        /*this.pythonSvc.downloadFile("creditcardagreement_117.txt", "text/plain").subscribe((res) => {
+            console.log(res);
+        })
+        */
+
+        //var window: Window;
+        //window.location.href = this.pythonSvc.downloadUrl("creditcardagreement_117.txt")
+        window.open(this.pythonSvc.downloadUrl(fileName), fileName);
 
 
 

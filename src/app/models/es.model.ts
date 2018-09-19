@@ -139,6 +139,7 @@ export interface IFileSection extends IFileSectionMeta {
     ents?: Array<IEntity>
     sents?: Array<IFileSent>
     simStats?: IStat
+    selected?: boolean
 
 
 }
@@ -191,6 +192,21 @@ export enum Score {
     FALSE_NEGATIVE = -2//"type1-false_negative"
 
 }
+
+export const MATCH_BREAKS = {
+    MATCH: 16,
+    NOTMATCH: 23
+}
+export enum StatusBadge {
+    MATCH = "badge badge-primary",
+    GREY = "badge badge-warning",
+    NOTMATCH = "badge badge-success"
+}
+export enum MatchStatus {
+    MATCH,
+    GREY,
+    NOTMATCH
+}
 export interface ISentSimilarity {
     /*"sentId",
                 "sectionText",
@@ -212,6 +228,10 @@ export interface ISentSimilarity {
     words?: Array<string>
     rank: number;
     docCount: number;
+    confidence: number;
+    status: string
+    style: any
+    clazz: any
 
 }
 

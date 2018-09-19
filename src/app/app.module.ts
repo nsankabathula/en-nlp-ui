@@ -28,6 +28,8 @@ import { Doc2VecTrainingComponent } from 'src/app/compare/training.d2v.component
 import { EntityModalContent, EntityStyleDirective } from 'src/app/compare/entity.component';
 import { DocSimilarityComponent } from 'src/app/compare/doc-similarity.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatchHeightDirective } from 'src/app/common/match-height.directive';
+import { WindowRef } from 'src/app/services/window.service';
 
 
 @NgModule({
@@ -43,7 +45,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     Doc2VecTrainingComponent,
     EntityModalContent,
     EntityStyleDirective,
-    DocSimilarityComponent
+    DocSimilarityComponent,
+
   ],
   imports: [
     BrowserModule,
@@ -58,7 +61,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 
   ],
-  providers: [AppService, TrainingService, CompareService, CoreEsService, CreditEsService, PyService],
+  providers: [AppService, TrainingService, CompareService, CoreEsService, CreditEsService, PyService, WindowRef],
   bootstrap: [AppComponent],
   entryComponents: [ModalContent, EntityModalContent]
 })

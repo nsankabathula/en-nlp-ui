@@ -6,10 +6,10 @@ import { Observable, of, from, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { IEsService, ISearch } from 'src/app/services/es-iterfaces.service';
 import { IESError, IAgreementSent, IESSearchResult, IESAggResult, IHit, ESError, Hit, IAggResult } from 'src/app/models/es.model';
-import { ConfigService } from 'src/app/services/config.service';
 
+import { environment } from '../../environments/environment';
 
-const SERVER = ConfigService.getServer("9200")//"http://3e18eae8.ngrok.io/"
+const SERVER = environment.esearch//ConfigService.getServer("9200")//"http://3e18eae8.ngrok.io/"
 const ES_CONFIG = {
     host: SERVER,
     log: 'info'
