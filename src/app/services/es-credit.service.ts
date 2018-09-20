@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { CoreEsService } from 'src/app/services/es.service';
 import { Observable, of, from, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { IESSearchResult, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, ISortModel, IFileMeta, IFile, IStat, ISentSimilarity, IDocSentSimilarityStats, ISimilarityResult, ISimilarityDocBucket, IFileSentMeta, IFileSent, IFileSection, IFileSectionMeta, ISentBasic } from 'src/app/models/es.model';
+import { IESSearchResult, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, ISortModel, IFileMeta, IFile, IStat, ISentSimilarity, IDocSentSimilarityStats, ISimilarityResult, ISimilarityDocBucket, IFileSentMeta, IFileSent, IFileSection, IFileSectionMeta, } from 'src/app/models/es.model';
 import { reserveSlots } from '@angular/core/src/render3/instructions';
 import { send } from 'q';
 const query_all_docs = {

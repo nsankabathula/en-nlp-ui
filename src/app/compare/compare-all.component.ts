@@ -5,7 +5,7 @@ import { forkJoin } from "rxjs";
 import { error } from 'util';
 import { FileItem } from 'src/app/models/model';
 import { FileSection } from 'src/app/models/compare.models';
-import { IESError, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, IFileMeta, IFile, IFileSection, ISentSimilarity, IStat, IEntity, IFileSectionMeta, Score, MatchStatus, MATCH_BREAKS, StatusBadge, ISentBasic } from 'src/app/models/es.model';
+import { IESError, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, IFileMeta, IFile, IFileSection, ISentSimilarity, IStat, IEntity, IFileSectionMeta, Score, MatchStatus, MATCH_BREAKS, StatusBadge } from 'src/app/models/es.model';
 import { CreditEsService } from 'src/app/services/es-credit.service';
 import { Options, LabelType, ChangeContext, PointerType } from 'ng5-slider';
 import { PyService } from 'src/app/services/python.service';
