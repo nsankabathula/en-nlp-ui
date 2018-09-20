@@ -129,7 +129,8 @@ export interface IFileSent extends IFileSentMeta {
     text: string;
     startChar: number;
     endChar: number;
-    similarity: number
+    sentSimilarity: number
+    sentText?: string
 
 }
 
@@ -207,6 +208,9 @@ export enum MatchStatus {
     UKNOWN,
     NOTMATCH
 }
+
+
+
 export interface ISentSimilarity {
     /*"sentId",
                 "sectionText",
@@ -233,12 +237,13 @@ export interface ISentSimilarity {
     style: any
     clazz: any
     shortName: string
+    sentStats: IDocSentSimilarityStats
 
 }
 
 export interface IDocSentSimilarityStats {
     stats: IStat,
-    docSents: Array<ISentSimilarity>
+    docSents: Array<ISentSimilarity | IFileSent>
 }
 
 export interface IESQuery {

@@ -5,7 +5,7 @@ import { forkJoin } from "rxjs";
 import { error } from 'util';
 import { FileItem } from 'src/app/models/model';
 import { FileSection } from 'src/app/models/compare.models';
-import { IESError, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, IFileMeta, IFile, IFileSection, ISentSimilarity, IStat, IEntity, IFileSectionMeta, Score, MatchStatus, MATCH_BREAKS, StatusBadge } from 'src/app/models/es.model';
+import { IESError, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, IFileMeta, IFile, IFileSection, ISentSimilarity, IStat, IEntity, IFileSectionMeta, Score, MatchStatus, MATCH_BREAKS, StatusBadge, ISentBasic } from 'src/app/models/es.model';
 import { CreditEsService } from 'src/app/services/es-credit.service';
 import { Options, LabelType, ChangeContext, PointerType } from 'ng5-slider';
 import { PyService } from 'src/app/services/python.service';
@@ -189,12 +189,23 @@ export class CompareAllComponent {
                     value.confidence = (MatchStatus[MatchStatus.MATCH] == value.status) ? 100 - value.confidence : value.confidence;
                     value.style = {
                         background:
-                            (value.status == MatchStatus[MatchStatus.MATCH]) ? "linear-gradient(to bottom, #33ccff" + value.confidence + "%, #33cc33 100%)" :
+                            (value.status == MatchStatus[MatchStatus.MATCH]) ? "linear-gradient(to bottom, #33ccff " + value.confidence + "%, #33cc33 100%)" :
                                 "linear-gradient(to bottom, #33ccff 0%, #ccff33" + value.confidence + "%)"
 
                     }
                     value.clazz = StatusBadge[value.status]
                     value.shortName = value.name.substring(5, 20) + ".." + value.name.substring(value.name.length - 4)
+                    //console.log(value.name + "_" + value.query.sectionId + "_1", value.startChar, value.endChar)
+                    this.csService.getSentenceStats(value.name + "_" + value.query.sectionId + "_1", value.startChar, value.endChar)
+                        .subscribe(
+                        (stat: any) => {
+                            //console.log(stat)
+                            value.sentStats = stat
+                        }, ((error) => { console.error(error) }),
+                        () => {
+                            //console.log(value)
+                        }
+                        )
 
                     return value;
                 });

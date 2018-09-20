@@ -20,7 +20,7 @@ export class Helper {
             return tunnel.name == name
         });
 
-        return config.public_url
+        return config.public_url + "/"
     }
 
     public static configs = SERVER_CONFIGS.tunnels;

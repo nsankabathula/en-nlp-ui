@@ -1,33 +1,32 @@
 import { Component, Input, SimpleChange } from '@angular/core';
 
 import { Observable } from 'rxjs';
-import { IFile, IFileSent, IFileSection } from 'src/app/models/es.model';
+import { IFile, IFileSent, IFileSection, IDocSentSimilarityStats, ISentSimilarity } from 'src/app/models/es.model';
+import { compare } from 'src/app/services/es-credit.service';
 interface UIFileSent extends IFileSent {
     sectionId: number;
     sentId: number
-    text: string;
+    sentText: string;
     startChar: number;
     endChar: number;
     similarity: number
     label: "highlight" | "none"
 }
-interface UIFileSection extends IFileSection {
-    text: string;
-    isCollapsed: boolean;
-    sents: Array<UIFileSent>
-}
 
 @Component({
     selector: 'app-doc-similarity',
     templateUrl: './doc-similarity.component.html',
+    styleUrls: ['./doc-similarity.component.css']
 })
 
 export class DocSimilarityComponent {
 
     @Input("doc")
-    document: IFile
+    document: IDocSentSimilarityStats
 
-    docSections: Array<UIFileSection> = [];
+    topN: number = 1
+
+    docSents: Array<UIFileSent> = [];
 
     constructor() {
 
@@ -35,61 +34,44 @@ export class DocSimilarityComponent {
 
     ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
         const clone = function (obj) {
+            //console.log("clone", obj)
             return JSON.parse(JSON.stringify(obj));
         }
         for (let propName in changes) {
             let changedProp = changes[propName];
             if (propName === "document") {
-                const doc = <IFile>clone(changedProp.currentValue);
-                this.docSections = [];
-                doc.sections.forEach((sectionValue) => {
-                    const section: UIFileSection = clone(sectionValue)
-                    var prevStart = 0
-                    var sectionSents: Array<UIFileSent> = []
-                    section.sents.forEach((value) => {
-                        const sent: IFileSent = clone(value)
-                        if (prevStart !== sent.startChar) {
-                            sectionSents.push(
-                                Object.assign(clone(sent), <UIFileSent>{
-                                    text: section.text.substring(prevStart, sent.startChar),
-                                    label: "none",
-                                    startChar: prevStart,
-                                    endChar: sent.startChar,
-                                    sentId: sectionSents.length
-                                })
-                            )
-                        }
-                        prevStart = sent.startChar
-                        sectionSents.push(
-                            Object.assign(clone(sent), <UIFileSent>{
-                                text: section.text.substring(prevStart, sent.endChar),
-                                label: (sent.text.split(" ").length > 5) ? "highlight" : "none",
-                                startChar: prevStart,
-                                endChar: sent.endChar
+                if (changedProp.currentValue) {
+                    this.document = <IDocSentSimilarityStats>clone(changedProp.currentValue);
+                    //console.log(this.document)
+                    var topNSents = [].concat(this.document.docSents)
+                    topNSents = [].concat(topNSents.sort(compare("sentSimilarity", "desc")).slice(0, this.topN))
+                    //console.log("topNSents", topNSents)
+                    this.docSents =
+                        [].concat(
+                            this.document.docSents.map((sent: IFileSent) => {
+                                return <UIFileSent>
+                                    Object.assign(clone(sent), <UIFileSent>{
+                                        label: (topNSents.find((top) => {
+                                            return top.sectionId === sent.sectionId && top.sentId === sent.sentId
+                                        })) ? "highlight" : "none",
+                                    })
                             })
-                        )
+                        );
 
-                        prevStart = sent.endChar
 
-                    })
+                }
 
-                    this.docSections.push(
-                        Object.assign(clone(section),
-                            <UIFileSection>{
-                                sents: [].concat(sectionSents)
-                            })
-                    )
-                })
+
 
             }
             else
                 console.log("Prop Name : ", propName);
             //console.log(to);
 
-
         }
-
     }
+
+
 
 
 }

@@ -23,7 +23,7 @@
             </span>
         </div>-->
         <div class="col-sm-5">
-            <div class="btn-group" role="group" aria-label="target button group">
+            <div class="btn-group" role="group" aria-label="target button group" *ngIf="selectedFileMeta">
                 <button class="btn btn-secondary btn-info">
                     {{selectedFileMeta.name}}
                 </button>
@@ -190,8 +190,9 @@
 
                             <div class="card-body">
 
-                                <!--<span class="badge badge-info">RELEVANT MATCH</span>-->
-                                {{doc.sentText}}
+                                <!--<span class="badge badge-info">RELEVANT MATCH</span>
+                                {{doc.sentText}}-->
+                                <app-doc-similarity [doc]="doc.sentStats"></app-doc-similarity>
                                 <br/>
 
 

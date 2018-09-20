@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { CoreEsService } from 'src/app/services/es.service';
 import { Observable, of, from, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { IESSearchResult, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, ISortModel, IFileMeta, IFile, IStat, ISentSimilarity, IDocSentSimilarityStats, ISimilarityResult, ISimilarityDocBucket, IFileSentMeta, IFileSent, IFileSection, IFileSectionMeta } from 'src/app/models/es.model';
+import { IESSearchResult, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, ISortModel, IFileMeta, IFile, IStat, ISentSimilarity, IDocSentSimilarityStats, ISimilarityResult, ISimilarityDocBucket, IFileSentMeta, IFileSent, IFileSection, IFileSectionMeta, ISentBasic } from 'src/app/models/es.model';
 import { reserveSlots } from '@angular/core/src/render3/instructions';
 import { send } from 'q';
 const query_all_docs = {
@@ -23,7 +23,7 @@ const sort = function (a, b, key) {
     if (keyA > keyB) return 1;
     return 0;
 }
-const compare = function (key, order = "asc") {
+export const compare = function (key, order = "asc") {
     return function (a, b) {
         if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
             // property doesn't exist on either object
@@ -198,22 +198,22 @@ export class CreditEsService {
 
     }
 
-    getDocSimilarityStats(name: string, field: string = "similarity", defaultVal: any = { isCollapsed: true }): Observable<IDocSentSimilarityStats> {
+    getSentenceStats(index: string, startIndex: number, endIndex: number): Observable<IDocSentSimilarityStats> {
 
         var query = {
             "from": 0,
             "size": 10000,
             "sort": [
                 {
-                    "similarity": {
-                        "order": "desc"
+                    "index": {
+                        "order": "asc"
                     }
                 }
             ],
             "aggs": {
                 "similarity": {
                     "stats": {
-                        "field": field
+                        "field": "sentSimilarity"
                     }
                 }
             }
@@ -224,22 +224,26 @@ export class CreditEsService {
                 "startChar",
                 "endChar",
                 "name",
-                "similarity",
-                "sectionId"
+                "sentSimilarity",
+                "sectionId",
+                "words"
             ],
             "query": {
-                "term": {
-                    "name.keyword": name
+                "range": {
+                    "index": {
+                        "gte": startIndex,
+                        "lte": endIndex
+                    }
                 }
             }
 
         }
-        return this.esService._search<IDocSentSimilarityStats>(this.index, this.docType, query, null).pipe(
+        return this.esService._search<IDocSentSimilarityStats>(index, this.docType, query, null).pipe(
             map((result: IESSearchResult<any>) => {
                 return <IDocSentSimilarityStats>{
-                    stats: result.aggregations[field],
-                    docSents: <Array<ISentSimilarity>>result.hits.hits.map((hit: IHit<ISentSimilarity>) => {
-                        return <ISentSimilarity>Object.assign(defaultVal, hit._source)
+                    stats: result.aggregations["similarity"],
+                    docSents: <Array<IFileSent>>result.hits.hits.map((hit: IHit<IFileSent>) => {
+                        return <IFileSent>Object.assign({}, hit._source)
                     })
                 }
             }
@@ -298,7 +302,40 @@ export class CreditEsService {
             ));
     }
 
+    getSentences(index: string, startIndex, endIndex): Observable<Array<IFileSent>> {
+        const query =
+            {
+                "query": {
+                    "range": {
+                        "index": {
+                            "gte": startIndex,
+                            "lte": endIndex
+                        }
+                    }
+                },
+                "_source": [
+                    "sentId",
+                    "sectionId",
+                    "sentText",
+                    "sentSimilarity",
+                    "name",
+                    "words"
+                ],
+                "sort": [
+                    {
+                        "sentSimilarity": {
+                            "order": "desc"
+                        }
+                    }
+                ]
+            }
 
+        return this.esService.find(index, null, query, null).pipe(map((res: Array<IFileSent>) => {
+            return res;
+        }));
+
+
+    }
 
     getDocSimilarity(name: string, index: string = this.index): Observable<Array<ISentSimilarity>> {
         var query = {

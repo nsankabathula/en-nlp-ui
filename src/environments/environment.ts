@@ -5,7 +5,7 @@ import { Helper } from './helper';
 export const environment = {
   production: false,
   esearch: Helper.tunnel("esearch"),
-  webservice: Helper.tunnel("8000"),
+  webservice: Helper.tunnel("ws"),
   configs: Helper.configs
 };
 
