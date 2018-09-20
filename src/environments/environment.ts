@@ -4,8 +4,8 @@ import { Helper } from './helper';
 
 export const environment = {
   production: false,
-  esearch: Helper.server("9200"),
-  webservice: Helper.server("8000"),
+  esearch: Helper.tunnel("esearch"),
+  webservice: Helper.tunnel("8000"),
   configs: Helper.configs
 };
 
