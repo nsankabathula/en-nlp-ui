@@ -4,7 +4,7 @@
 /dist
 /tmp
 /out-tsc
-
+/src/environments/*.json
 # dependencies
 /node_modules
 package-lock.json
