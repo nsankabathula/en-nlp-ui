@@ -24,7 +24,7 @@ export class DocSimilarityComponent {
     @Input("doc")
     document: IDocSentSimilarityStats
 
-    topN: number = 1
+    topN: number = 3
 
     docSents: Array<UIFileSent> = [];
 
