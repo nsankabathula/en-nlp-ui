@@ -1,0 +1,269 @@
+{
+    "tunnels": [
+        {
+            "name": "ws",
+            "uri": "/api/tunnels/ws",
+            "public_url": "https://url",
+            "proto": "https",
+            "config": {
+                "addr": "host:port",
+                "inspect": true
+            },
+            "metrics": {
+                "conns": {
+                    "count": 0,
+                    "gauge": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                },
+                "http": {
+                    "count": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                }
+            }
+        },
+        {
+            "name": "esearch (http)",
+            "uri": "/api/tunnels/esearch+%28http%29",
+            "public_url": "https://url",
+            "proto": "http",
+            "config": {
+                "addr": "localhost:9200",
+                "inspect": false
+            },
+            "metrics": {
+                "conns": {
+                    "count": 0,
+                    "gauge": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                },
+                "http": {
+                    "count": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                }
+            }
+        },
+        {
+            "name": "esearch",
+            "uri": "/api/tunnels/esearch",
+            "public_url": "https://url",
+            "proto": "https",
+            "config": {
+                "addr": "localhost:9200",
+                "inspect": false
+            },
+            "metrics": {
+                "conns": {
+                    "count": 0,
+                    "gauge": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                },
+                "http": {
+                    "count": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                }
+            }
+        },
+        {
+            "name": "angular (http)",
+            "uri": "/api/tunnels/angular+%28http%29",
+            "public_url": "https://url",
+            "proto": "http",
+            "config": {
+                "addr": "host:port",
+                "inspect": true
+            },
+            "metrics": {
+                "conns": {
+                    "count": 0,
+                    "gauge": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                },
+                "http": {
+                    "count": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                }
+            }
+        },
+        {
+            "name": "angular",
+            "uri": "/api/tunnels/angular",
+            "public_url": "https://url",
+            "proto": "https",
+            "config": {
+                "addr": "host:port",
+                "inspect": true
+            },
+            "metrics": {
+                "conns": {
+                    "count": 0,
+                    "gauge": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                },
+                "http": {
+                    "count": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                }
+            }
+        },
+        {
+            "name": "jnotebook (http)",
+            "uri": "/api/tunnels/jnotebook+%28http%29",
+            "public_url": "https://url",
+            "proto": "http",
+            "config": {
+                "addr": "host:port",
+                "inspect": false
+            },
+            "metrics": {
+                "conns": {
+                    "count": 0,
+                    "gauge": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                },
+                "http": {
+                    "count": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                }
+            }
+        },
+        {
+            "name": "jnotebook",
+            "uri": "/api/tunnels/jnotebook",
+            "public_url": "https://url",
+            "proto": "https",
+            "config": {
+                "addr": "host:port",
+                "inspect": false
+            },
+            "metrics": {
+                "conns": {
+                    "count": 0,
+                    "gauge": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                },
+                "http": {
+                    "count": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                }
+            }
+        },
+        {
+            "name": "ws (http)",
+            "uri": "/api/tunnels/ws+%28http%29",
+            "public_url": "https://url",
+            "proto": "http",
+            "config": {
+                "addr": "host:port",
+                "inspect": true
+            },
+            "metrics": {
+                "conns": {
+                    "count": 0,
+                    "gauge": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                },
+                "http": {
+                    "count": 0,
+                    "rate1": 0,
+                    "rate5": 0,
+                    "rate15": 0,
+                    "p50": 0,
+                    "p90": 0,
+                    "p95": 0,
+                    "p99": 0
+                }
+            }
+        }
+    ],
+    "uri": "/api/tunnels"
+}
