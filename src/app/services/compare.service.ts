@@ -9,7 +9,7 @@ import { map, } from 'rxjs/operators';
 import { element } from '@angular/core/src/render3/instructions';
 import { TrainingService } from 'src/app/services/training.service';
 import { filter } from 'rxjs/internal/operators/filter';
-import { FileSection, ISection } from 'src/app/models/compare.models';
+import { FileSection, ISection } from 'src/app/models/file.model';
 
 
 //const SERVER = "http://eef23428.ngrok.io/"

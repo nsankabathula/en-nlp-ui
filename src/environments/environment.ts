@@ -6,7 +6,8 @@ export const environment = {
   production: false,
   esearch: Helper.tunnel("esearch"),
   webservice: Helper.tunnel("ws"),
-  configs: Helper.configs
+  configs: Helper.configs,
+  couchdb: Helper.tunnel("couchdb"),
 };
 
 /*

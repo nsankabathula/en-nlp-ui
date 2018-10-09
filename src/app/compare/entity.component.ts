@@ -1,6 +1,6 @@
 import { NgbModal, NgbActiveModal, } from '@ng-bootstrap/ng-bootstrap/';
 import { Component, Input, OnChanges, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { IEntity } from 'src/app/models/es.model';
+import { IEntity } from 'src/app/models/file.model';
 import { SimpleChange } from '@angular/core/src/change_detection/change_detection_util';
 interface ICheckedLabel {
     label: string
@@ -52,7 +52,6 @@ export class EntityModalContent implements OnChanges, OnInit {
                 })
 */
 
-
                 var prevStart, prevEnd = 0;
                 that.textEntities = [];
                 that.ents = that.ents.filter((ent: IEntity) => {
@@ -62,7 +61,7 @@ export class EntityModalContent implements OnChanges, OnInit {
                 that.ents.forEach((ent: IEntity) => {
                     //console.log(ent)
 
-                    if (ent.label !== "ORG" && ent.label !== "GPE" && ent.label !== "PERSON") {
+                    if (ent.label !== "ORG" && ent.label !== "GPEx" && ent.label !== "PERSONx") {
                         if (!that.entMap.has(ent.label)) {
                             that.entMap.set(ent.label, []);
                         }
@@ -168,7 +167,7 @@ export class EntityModalContent implements OnChanges, OnInit {
 }
 
 import { Directive, ElementRef, AfterViewInit } from '@angular/core';
-import { IEntities } from 'src/app/models/compare.models';
+import { IEntities } from 'src/app/models/file.model';
 
 @Directive({
     selector: '[data-entity]'

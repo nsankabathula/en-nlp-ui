@@ -30,6 +30,8 @@ import { DocSimilarityComponent } from 'src/app/compare/doc-similarity.component
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatchHeightDirective } from 'src/app/common/match-height.directive';
 import { WindowRef } from 'src/app/services/window.service';
+import { CouchDbService } from 'src/app/services/couchdb.service';
+import { NlpService } from 'src/app/services/nlp.service';
 
 
 @NgModule({
@@ -61,7 +63,8 @@ import { WindowRef } from 'src/app/services/window.service';
 
 
   ],
-  providers: [AppService, TrainingService, CompareService, CoreEsService, CreditEsService, PyService, WindowRef],
+  providers: [AppService, TrainingService, CompareService, CoreEsService, CreditEsService, PyService, WindowRef,
+    CouchDbService, NlpService],
   bootstrap: [AppComponent],
   entryComponents: [ModalContent, EntityModalContent]
 })

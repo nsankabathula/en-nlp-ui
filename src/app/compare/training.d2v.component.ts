@@ -1,5 +1,6 @@
 import { Component, Input, OnChanges, SimpleChange } from '@angular/core';
 
+
 @Component({
     selector: 'app-doc2vec-training',
     template: `
@@ -8,13 +9,20 @@ import { Component, Input, OnChanges, SimpleChange } from '@angular/core';
     <li>Show docs</li>
     <li>Option to remove docs</li>
     <li>Option to upload new docs</li>
-    <li>Training</li>
+    <li>Training</li>    
    </ul>
-   
+   <div>
+   {{result | json}}</div>
    </div>
     `
 })
 
 export class Doc2VecTrainingComponent {
+
+    result: any
+
+    constructor() {
+
+    }
 
 }

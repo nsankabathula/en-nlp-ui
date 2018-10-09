@@ -6,14 +6,14 @@ import { error } from 'util';
 import { CreditEsService } from 'src/app/services/es-credit.service';
 import { PyService } from 'src/app/services/python.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap/modal/modal';
-import { IFileMeta, ISentSimilarity } from 'src/app/models/es.model';
+import { IFileMeta, ITargetBlock } from 'src/app/models/file.model';
 @Component({
     selector: 'app-compare-one',
     templateUrl: './compare-one.component.html',
 })
 export class CompareOneComponent {
     fileMetaData: Array<IFileMeta> = [];
-    SentSimDoc: Array<ISentSimilarity> = [];
+    SentSimDoc: Array<ITargetBlock> = [];
 
     constructor(private csService: CreditEsService, private pythonSvc: PyService, private modalSvc: NgbModal) {
 
@@ -29,7 +29,7 @@ export class CompareOneComponent {
     }
     showSimilarity(file: IFileMeta) {
         this.csService.getDocSimilarity(file.name).subscribe(
-            (res: Array<ISentSimilarity>) => {
+            (res: Array<ITargetBlock>) => {
                 this.SentSimDoc = res;
 
             }, (err: any) => { console.error(err) }
@@ -41,7 +41,7 @@ export class CompareOneComponent {
     }
 
 
-    showDoc(doc: ISentSimilarity) {
+    showDoc(doc: ITargetBlock) {
 
 
 

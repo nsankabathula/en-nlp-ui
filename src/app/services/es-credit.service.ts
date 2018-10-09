@@ -4,9 +4,11 @@ import { Injectable } from '@angular/core';
 import { CoreEsService } from 'src/app/services/es.service';
 import { Observable, of, from, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { IESSearchResult, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, ISortModel, IFileMeta, IFile, IStat, ISentSimilarity, IDocSentSimilarityStats, ISimilarityResult, ISimilarityDocBucket, IFileSentMeta, IFileSent, IFileSection, IFileSectionMeta, } from 'src/app/models/es.model';
-import { reserveSlots } from '@angular/core/src/render3/instructions';
-import { send } from 'q';
+import { IESSearchResult, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, ISortModel, IStat, ISimilarityDocBucket, } from 'src/app/models/es.model';
+
+import { IFile, ITargetBlock, IDocSentSimilarityStats } from "src/app/models/file.model"
+import { IFileSentMeta, IFileSent, IFileSection, IFileSectionMeta, IFileMeta } from "src/app/models/file.model"
+
 const query_all_docs = {
     "from": 0,
     "size": 100000000,
@@ -251,7 +253,7 @@ export class CreditEsService {
 
     }
 
-    getDocSimilarities(index = this.index, minSimilarity: number = 0.6, maxSimilarity: number = 0.9): Observable<Array<ISentSimilarity>> {
+    getDocSimilarities(index = this.index, minSimilarity: number = 0.6, maxSimilarity: number = 0.9): Observable<Array<ITargetBlock>> {
         var query = {
             "from": 0,
             "size": 50,
@@ -287,10 +289,10 @@ export class CreditEsService {
         }
 
 
-        return this.esService.find<ISentSimilarity>(index, null, query, null);
+        return this.esService.find<ITargetBlock>(index, null, query, null);
     }
 
-    updateTarget(sent: ISentSimilarity, index: string = this.index): Observable<any> {
+    updateTarget(sent: ITargetBlock, index: string = this.index): Observable<any> {
         const id = sent.name + "_" + sent.sectionId + "_" + sent.sentId;
         console.log("updateScore", id);
         return this.esService.update(index, this.docType, id, { target: sent.target })
@@ -337,7 +339,7 @@ export class CreditEsService {
 
     }
 
-    getDocSimilarity(name: string, index: string = this.index): Observable<Array<ISentSimilarity>> {
+    getDocSimilarity(name: string, index: string = this.index): Observable<Array<ITargetBlock>> {
         var query = {
             "from": 0,
             "size": 100,
@@ -374,78 +376,14 @@ export class CreditEsService {
         }
 
 
-        return this.esService.find<ISentSimilarity>(index, this.docType, query, null).pipe(map((res) => {
+        return this.esService.find<ITargetBlock>(index, this.docType, query, null).pipe(map((res) => {
             res.forEach((value) => {
                 value.query.index = value.query.name.toLowerCase() + "_" + value.query.sectionId
             })
             return res;
         }));
     }
-    /*
-        getSimBySection(minSimilarity: number = 0.3, maxSimilarity: number = 0.7, index: string = this.index): Observable<Array<IFile>> {
-            const query =
-                {
-                    "id": "getSimBySection",
-                    "params": {
-                        "minSimilarity": minSimilarity,
-                        "maxSimilarity": maxSimilarity
-                    }
-                };
-    
-            return this.esService.agg(index, this.docType, query, null, true).pipe(map((res: ISimilarityResult) => {
-                //console.log("getSimBySection", res);
-                var simQuery = {
-                    name: "",
-                    sectionId: ""
-                };
-                const docs: Array<IFile> = res.name.buckets.map((bucket: ISimilarityDocBucket) => {
-                    var sections: Array<IFileSection> = bucket.section.buckets.map((section) => {
-                        simQuery = section.query.hits.hits[0]._source.query;
-                        return <IFileSection>{
-                            text: section.sectionText.hits.hits[0]._source.sectionText,
-                            simStats: {
-                                min: section.minSim.value,
-                                max: section.maxSim.value
-                            },
-                            sectionId: section.key,
-                            sents: (<Array<IFileSentMeta>>section.sents.hits.hits.map((sent, idx) => {
-                                return <IFileSent>{
-                                    sentId: sent._source.sentId,
-                                    endChar: section.endChar.hits.hits[idx]._source.endChar,
-                                    startChar: section.startChar.hits.hits[idx]._source.startChar,
-                                    sectionId: section.key,
-                                    similarity: section.sims.hits.hits[idx]._source.sentSimilarity,
-                                    text: section.sectionText.hits.hits[0]._source.sectionText.substring(section.startChar.hits.hits[idx]._source.startChar, section.endChar.hits.hits[idx]._source.endChar)
-                                }
-                            })).sort(compare("startChar", "asc"))
-                        }
-                    });
-                    var sectionSents: Array<IFileSent> = [];
-    
-                    sections.forEach((section) => {
-                        sectionSents = sectionSents.concat(section.sents)
-                    })
-    
-                    const doc = <IFile>{
-                        name: bucket.key,
-                        sections: sections,
-                        query: simQuery,
-                        simStats: {
-                            min: sections[sections.length - 1].simStats.min,
-                            max: sections[0].simStats.max
-                        },
-                        sents: [].concat(sectionSents),
-                        isCollapsed: true
-                    }
-                    doc.query = Object.assign(doc.query, { "index": doc.query.name.toLowerCase() + "_" + doc.query.sectionId })
-                    //console.log(doc.query)
-                    return doc
-                })
-                return docs;
-            }));
-    
-        }// End Of Function
-    */
+
 
 }
 

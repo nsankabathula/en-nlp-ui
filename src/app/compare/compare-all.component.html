@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div class="container-fluid ">
     <div class="row">
         <!--
         <div class="col-sm-3">
@@ -7,7 +7,7 @@
                 <div ngbDropdownMenu>
 
                     <div *ngFor="let file of fileMetaData">
-                        <button class="dropdown-item" (click)="getFileSections(file)">{{file.name}} ({{file.sectionCount}}/{{file.sentCount}}) </button>
+                        <button class="dropdown-item" (click)="getFileSections(file)">{{file.name}} ({{file.sectionCount}}) </button>
                     </div>
 
                 </div>
@@ -16,50 +16,69 @@
 
 
         </div>
+
         <div class="col-sm-4" *ngIf="selectedFileMeta">
 
             <span class="badge badge-info">
                 {{selectedFileMeta.name}}
             </span>
-        </div>-->
-        <div class="col-sm-5">
-            <div class="btn-group" role="group" aria-label="target button group" *ngIf="selectedFileMeta">
+        </div>
+        -->
+        <div class="col-sm-6">
+            <div class="btn-group" role="group" aria-label="target button group" *ngIf="document">
                 <button class="btn btn-secondary btn-info">
-                    {{selectedFileMeta.name}}
+                    {{document.name}}
                 </button>
-                <button class="btn btn-secondary btn-sm" (click)="showFile(selectedFileMeta.name, 'txt')">
+                <button class="btn btn-secondary btn-sm" (click)="showFile(document.name, 'txt')">
                     <i class="material-icons md-18">
                         text_format
                     </i>
                 </button>
-                <button class="btn btn-secondary btn-sm" (click)="showFile(selectedFileMeta.name, 'pdf')">
+                <button class="btn btn-secondary btn-sm" (click)="showFile(document.name, 'pdf')">
                     <i class="material-icons md-18">
                         picture_as_pdf
                     </i>
                 </button>
             </div>
         </div>
-        <!--
-        <div class="col-sm-3">
-            <button class="btn btn-link" (click)="showSimilarityResult()" aria-expanded="false">
-                Show Similarity
-            </button>
-        </div>
-    -->
-        <!--
-        <div class="col-sm-3" *ngIf="similartityStats">
-            <div class="custom-slider">
-                <ng5-slider [(value)]="similartityStats.minValue" [(highValue)]="similartityStats.maxValue" (userChangeStart)="onUserChangeStart($event)"
-                    (userChange)="onUserChange($event)" (userChangeEnd)="onUserChangeEnd($event)" [options]="sliderOptions"></ng5-slider>
-            </div>
 
-        </div>-->
+
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-6 justify-content-start">
+                    <form class="form-inline my-2 my-lg-0">
+
+                        <input class="form-control mr-lg-2" type="search" placeholder="Target Document" aria-label="Search">
+                        <i class="material-icons md-18">
+                            search
+                        </i>
+                    </form>
+                </div>
+                <div class="col-sm-6 pagination justify-content-end">
+                    <div class="btn-group " role="group" aria-label="target button group">
+
+                        <button class="btn btn-outline-secondary btn-sm">
+                            <i class="material-icons md-18">
+                                navigate_before
+                            </i>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm">
+                            <i class="material-icons md-18">
+                                navigate_next
+                            </i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </div>
-    <div class="row" style="height: 100%">
+    <div class="row" style="height: 80%">
         <!--<div class="col-sm-4">
             {{document.text}}
         </div>-->
-        <div class="col-sm-6 " *ngIf="selectedFileMeta && document && document.sections">
+        <div class="col-sm-6 " *ngIf="document && document.sections">
             <!-- <span class="badge badge-info">{{selectedFileMeta.name}}</span>-->
             <div class="container-fluid pre-scrollable" [style.max-height.px]="leftDivHeight">
 
@@ -70,7 +89,16 @@
                                 <div class="col-sm-9">
                                     <button class="btn btn-link" data-toggle="collapse" (click)="section.isCollapsed = !section.isCollapsed" aria-expanded="false"
                                         aria-controls="collapseOne">
-                                        <span class="badge badge-secondary">Paragraph {{section.sectionId}}</span> {{section.text.substring(0, 25)}} ...
+                                        <span class="badge badge-secondary">Paragraph {{section.sectionId}}</span>
+                                        <div *ngIf="!section.title ;then text else title">
+                                        </div>
+                                        <ng-template #text>
+                                            {{section.text.substring(0, 25)}} ...
+                                        </ng-template>
+                                        <ng-template #title>
+                                            {{section.title}}
+                                        </ng-template>
+
                                     </button>
                                 </div>
                                 <div class="col-sm-2">
@@ -103,53 +131,13 @@
             </div>
         </div>
 
-        <!--
-        <div class="col-sm-6" *ngIf="DocSimilarities && DocSimilarities.length>0">
-            <div class="container-fluid">
-                <div class="row">
-                    <p>
-                        
-                        <span class="badge badge-secondary">Paragraph {{DocSimilarities[0].query.sectionId}}</span>
-                        {{DocSimilarities[0].query.text}}
-
-                    </p>
-                </div>
-                <div class="row" style="width: 100%">
-                    <div class="row" *ngFor="let doc of  DocSimilarities" style="width: 100%">
-                        <div id="#test" class="card" style="width: 100%">
-                            <div class="card-header" [id]="doc.name">
-                                <button class="btn btn-link" data-toggle="collapse" (click)="doc.isCollapsed = !doc.isCollapsed" aria-expanded="false" aria-controls="collapseOne">
-                                    {{doc.name}}
-                                    <span class="badge badge-info">{{doc.simStats.min | number:'1.1-2'}}</span> -
-                                    <span class="badge badge-info">{{doc.simStats.max | number:'1.1-2'}}</span>
-
-                                </button>
-                                <button class="btn btn-info btn-sm" (click)="showDoc(doc)">Show Doc</button>
-                            </div>
-                            <div [id]="doc.name" [ngbCollapse]="doc.isCollapsed" aria-labelledby="headingOne" data-parent="#accordion">
-
-                                <div class="card-body">
-
-                                    <app-doc-similarity [doc]="doc"></app-doc-similarity>
-                                </div>
 
 
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    -->
-
-        <div class="col-sm-6" *ngIf="documentSimilarities && documentSimilarities.length>0">
+        <div class="col-sm-6" *ngIf="targetBlocks && targetBlocks.length>0">
             <div class="container-fluid pre-scrollable" [style.max-height.px]="leftDivHeight">
-                <!-- <div class="row">
-                    <span>{{documentSimilarities[0].query.text}}</span>
-                </div>
-            -->
-                <div class="row" *ngFor="let doc of  documentSimilarities">
+
+
+                <div class="row" *ngFor="let doc of  targetBlocks">
                     <div class="card" style="width: 100%">
                         <div class="card-header" [id]="doc.sectionId">
                             <div class="row">
@@ -190,8 +178,7 @@
 
                             <div class="card-body">
 
-                                <!--<span class="badge badge-info">RELEVANT MATCH</span>
-                                {{doc.sentText}}-->
+                                <!--{{doc.sectionText}}-->
                                 <app-doc-similarity [doc]="doc.sentStats"></app-doc-similarity>
                                 <br/>
 
@@ -205,6 +192,8 @@
 
             </div>
         </div>
+
+
     </div>
 
 </div>

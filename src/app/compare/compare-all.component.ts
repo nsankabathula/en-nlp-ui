@@ -4,8 +4,13 @@ import { Observable } from 'rxjs';
 import { forkJoin } from "rxjs";
 import { error } from 'util';
 import { FileItem } from 'src/app/models/model';
-import { FileSection } from 'src/app/models/compare.models';
-import { IESError, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, IFileMeta, IFile, IFileSection, ISentSimilarity, IStat, IEntity, IFileSectionMeta, Score, MatchStatus, MATCH_BREAKS, StatusBadge } from 'src/app/models/es.model';
+import { FileSection } from 'src/app/models/file.model';
+import { IESError, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, IStat } from 'src/app/models/es.model';
+
+import { IFile, ITargetBlock, IDocSentSimilarityStats } from "src/app/models/file.model"
+import { IFileSentMeta, IFileSent, IFileSection, IFileSectionMeta, IFileMeta } from "src/app/models/file.model"
+import { Score, MatchStatus, MATCH_BREAKS, StatusBadge, IEntity } from "src/app/models/file.model"
+
 import { CreditEsService } from 'src/app/services/es-credit.service';
 import { Options, LabelType, ChangeContext, PointerType } from 'ng5-slider';
 import { PyService } from 'src/app/services/python.service';
@@ -13,6 +18,9 @@ import { NgbModal, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap/';
 import { ModalContent } from 'src/app/common/modal-content.component';
 import { EntityModalContent } from 'src/app/compare/entity.component';
 import { WindowRef } from 'src/app/services/window.service';
+
+
+import { NlpService } from 'src/app/services/nlp.service';
 
 declare let window;
 
@@ -25,48 +33,41 @@ export class CompareAllComponent {
 
     document: IFile;
     selectedFileMeta: IFileMeta = null;
-    documentSimilarities: Array<ISentSimilarity> = []
+    targetBlocks: Array<ITargetBlock> = []
     similartityStats: IStat = null;
     fileMetaData: Array<IFileMeta> = []
-    sentSimDoc: Array<ISentSimilarity> = [];
+    sentSimDoc: Array<ITargetBlock> = [];
     DocSimilarities: Array<IFile> = []
     INDEX: string = "";
     leftDivHeight: number = 880
 
     SCORE = Score;
 
-    sliderOptions: Options = {
-        floor: -1,
-        ceil: 1,
-        step: 0.05,
-        precision: 1,
-        minRange: .3,
-        maxRange: .8,
-        pushRange: true,
-        rightToLeft: false,
-        showTicks: true,
-        translate: (value: number, label: LabelType): string => {
-            //console.log("translate", value)
-            return ((value !== null && value !== undefined) ? Math.round(value * 100) / 100 : 0).toString();
-        }
-    };
     @ViewChild('showDocModal')
     private docModal: TemplateRef<any>;
 
-    constructor(private csService: CreditEsService, private pythonSvc: PyService, private modalSvc: NgbModal, private windowRef: WindowRef) {
+    constructor(//private csMetaSvc: CreditEsService, 
+        private pythonSvc: PyService,
+        private modalSvc: NgbModal, private windowRef: WindowRef, private nlpSvc: NlpService) {
 
+        this.nlpSvc.master().subscribe((res) => {
 
-        this.csService.getFileMetadata().subscribe((res: Array<IFileMeta>) => {
-            //console.log("getFileMetadata", res)
-            this.fileMetaData = res;
-            const doc = this.fileMetaData.find((value) => {
-                return value.name == "demo_master_visa_credit_card_agreement.txt"
+            this.document = res;
+
+            this.document.sections = this.document.sections.map((value: IFileSection) => {
+                value.ents = [].concat(this.document.ents.filter((ent: IEntity) => {
+                    return value.sectionId === ent.sectionId
+                }))
+
+                value.isCollapsed = true;
+                return value;
             })
-            this.getFileSections(doc)
-            this.resetHeight()
 
-            //this.showSimilarityForSection(doc, doc.sections[0]);
+            console.log("result", this.document);
+
         })
+
+
 
 
     }
@@ -82,20 +83,20 @@ export class CompareAllComponent {
         // call our matchHeight function here later
         this.resetHeight();
     }
-
-    callPythonScript(section: IFileSection, doc: IFileMeta) {
-        //const index = doc.name.toLowerCase() + "_" + section.sectionId.toString()
-        const index = section.index;
-        this.pythonSvc.callDoc2Vec(section, doc.name, index).subscribe((pyResult: any) => {
-            console.log("PyResult", pyResult)
+    /*
+        callPythonScript(section: IFileSection, doc: IFileMeta) {
+            //const index = doc.name.toLowerCase() + "_" + section.sectionId.toString()
+            const index = section.index;
+            this.pythonSvc.callDoc2Vec(section, doc.name, index).subscribe((pyResult: any) => {
+                console.log("PyResult", pyResult)
+                this.updateSimilarity(index);
+            });
+        }
+    
+        showSimilarityResult(index: string = "credit") {
             this.updateSimilarity(index);
-        });
-    }
-
-    showSimilarityResult(index: string = "credit") {
-        this.updateSimilarity(index);
-    }
-
+        }
+    */
     closeAllExcept(section: IFileSectionMeta) {
         this.document.sections.forEach((fileSec: IFileSection) => {
             fileSec.isCollapsed = section.sectionId !== fileSec.sectionId
@@ -103,149 +104,76 @@ export class CompareAllComponent {
         })
     }
 
-    showSimilarityForSection(doc: IFileMeta, section: IFileSectionMeta) {
+    showSimilarityForSection(doc: IFile, section: IFileSection) {
         //const index = doc.name.toLowerCase() + "_" + section.sectionId.toString()
 
         this.closeAllExcept(section)
 
         console.log("showSimilarityForSection", section, doc)
-        const index = doc.name + "_" + section.sectionId
 
-        this.fetchDocSimilarities(-1, 1, index);
+        this.fetchDocSimilarities(section);
     }
 
-    updateSimilarity(index: string = "credit") {
-        this.INDEX = index;
-        this.csService.getSimilarityStats(index).subscribe(
-            (result: IStat) => {
-                this.similartityStats = result;
-                const max = (this.similartityStats.max) ? this.similartityStats.max : 1
-                const min = (this.similartityStats.min) ? this.similartityStats.min : -1
-                this.sliderOptions.minLimit = min;
-                this.sliderOptions.maxLimit = max;
-                this.sliderOptions.floor = min;
-                this.sliderOptions.ceil = max;
+    fetchDocSimilarities(section: IFileSection) {
 
-                this.similartityStats.minValue = max / 2;
-                this.similartityStats.maxValue = max;
-
-                this.sliderOptions.maxRange = this.sliderOptions.step * 10
-                this.sliderOptions.minRange = this.sliderOptions.step;
-
-                console.log(this.similartityStats);
-                if (this.similartityStats) {
-                    this.fetchDocSimilarities(this.similartityStats.minValue, this.similartityStats.maxValue, index);
-                }
-            }
-        )
-    }
-    getFileSections(fileItem: IFileMeta) {
-        this.selectedFileMeta = null;
-        this.document = null;
-
-        this.csService.getDoc(fileItem).subscribe(
-            (res: IFile) => {
-                this.selectedFileMeta = fileItem
-                this.document = res;
-
-                this.document.sections = this.document.sections.map((value: IFileSection) => {
-                    value.ents = [].concat(this.document.ents.filter((ent: IEntity) => {
-                        return value.sectionId === ent.sectionId
-                    }))
-
-                    value.isCollapsed = true;
-                    return value;
-                })
-
-                //console.log(this.document.sections[0])
-
-
-            }
-        )
-
-
-    }
-
-    fetchDocSimilarities(minValue: number, maxValue: number, index: string = "credit") {
-        /*
-                this.csService.getSimBySection(minValue, maxValue, index).subscribe((response: Array<IFile>) => {
-                    this.DocSimilarities = response;
-                }, ((error) => { console.error(error) }), () => {
-                    console.log("fetchDocSimilarities", this.DocSimilarities);
-                })
-        */
-
-        this.csService.getDocSimilarities(index, minValue, maxValue).subscribe(
+        this.nlpSvc.target(section).subscribe(
             (result) => {
                 console.log("fetchDocSimilarities", result);
-                this.documentSimilarities = result;
-                this.documentSimilarities = this.documentSimilarities.map((value: ISentSimilarity) => {
-                    value.sectionText = value.words.join(" ");
-                    value.isCollapsed = true;
-                    value.rank = value.rank + 1
-                    value.confidence = ((value.rank / value.docCount) * 100)
-                    value.status = MatchStatus[(value.confidence < MATCH_BREAKS.MATCH) ? MatchStatus.MATCH : ((value.confidence > MATCH_BREAKS.NOTMATCH) ? MatchStatus.NOTMATCH : MatchStatus.UKNOWN)]
+                this.targetBlocks = result;
+                this.targetBlocks = this.targetBlocks.map((row: ITargetBlock) => {
+                    var names = row.name.split("\\")
 
-                    value.confidence = (MatchStatus[MatchStatus.MATCH] == value.status) ? 100 - value.confidence : value.confidence;
-                    value.style = {
+                    row.isCollapsed = true;
+                    row.rank = row.rank + 1
+                    row.confidence = ((row.rank / row.docCount) * 100)
+                    row.status = MatchStatus[(row.confidence < MATCH_BREAKS.MATCH) ? MatchStatus.MATCH : ((row.confidence > MATCH_BREAKS.NOTMATCH) ? MatchStatus.NOTMATCH : MatchStatus.UKNOWN)]
+
+                    row.confidence = (MatchStatus[MatchStatus.MATCH] == row.status) ? 100 - row.confidence : row.confidence;
+                    row.style = {
                         background:
-                            (value.status == MatchStatus[MatchStatus.MATCH]) ? "linear-gradient(to bottom, #33ccff " + value.confidence + "%, #33cc33 100%)" :
-                                "linear-gradient(to bottom, #33ccff 0%, #ccff33" + value.confidence + "%)"
+                            (row.status == MatchStatus[MatchStatus.MATCH]) ? "linear-gradient(to bottom, #33ccff " + row.confidence + "%, #33cc33 100%)" :
+                                "linear-gradient(to bottom, #33ccff 0%, #ccff33" + row.confidence + "%)"
 
                     }
-                    value.clazz = StatusBadge[value.status]
-                    value.shortName = value.name.substring(5, 20) + ".." + value.name.substring(value.name.length - 4)
+                    row.clazz = StatusBadge[row.status]
+                    //row.shortName = row.name.substring(5, 20) + ".." + row.name.substring(row.name.length - 4)
+                    row.shortName = names[names.length - 1]
+                    row.sentStats = { stats: null, docSents: row["targetSents"] }
                     //console.log(value.name + "_" + value.query.sectionId + "_1", value.startChar, value.endChar)
-                    this.csService.getSentenceStats(value.name + "_" + value.query.sectionId + "_1", value.startChar, value.endChar)
-                        .subscribe(
-                        (stat: any) => {
-                            //console.log(stat)
-                            value.sentStats = stat
-                        }, ((error) => { console.error(error) }),
-                        () => {
-                            //console.log(value)
-                        }
-                        )
+                    /* this.csMetaSvc.getSentenceStats(value.name + "_" + value.query.sectionId + "_1", value.startChar, value.endChar)
+                         .subscribe(
+                         (stat: any) => {
+                             //console.log(stat)
+                             value.sentStats = stat
+                         }, ((error) => { console.error(error) }),
+                         () => {
+                             //console.log(value)
+                         }
+                         )*/
 
-                    return value;
+                    return row;
                 });
-                this.documentSimilarities[0].isCollapsed = false;
+                this.targetBlocks[0].isCollapsed = false;
 
             })
 
     }
 
-    onUserChangeStart(changeContext: ChangeContext): void {
-        //this.logText += `onUserChangeStart(${this.getChangeContextString(changeContext)})\n`;
-    }
 
-    onUserChange(changeContext: ChangeContext): void {
-        //this.logText += `onUserChange(${this.getChangeContextString(changeContext)})\n`;
-    }
-
-    onUserChangeEnd(changeContext: ChangeContext): void {
-        //this.logText += `onUserChangeEnd(${this.getChangeContextString(changeContext)})\n`;
-        this.getChangeContextString(changeContext);
-    }
-
-    getChangeContextString(changeContext: ChangeContext): void {
-        this.fetchDocSimilarities(changeContext.value, changeContext.highValue, this.INDEX)
-
-    }
-
-    showDoc(doc: ISentSimilarity) {
-        console.log("showDoc", doc)
-        this.csService.getDocSimilarity(doc.name, doc.query.index).subscribe(
-            (res: Array<ISentSimilarity>) => {
-                this.sentSimDoc = res;
-
-            }, (err: any) => { console.error(err) }
-            , () => {
-                this.showModal(doc.name)
-            }
-        )
-    }
-
+    /*
+        showDoc(doc: ISentSimilarity) {
+            console.log("showDoc", doc)
+            this.csMetaSvc.getDocSimilarity(doc.name, doc.query.index).subscribe(
+                (res: Array<ISentSimilarity>) => {
+                    this.sentSimDoc = res;
+    
+                }, (err: any) => { console.error(err) }
+                , () => {
+                    this.showModal(doc.name)
+                }
+            )
+        }
+    */
     showFile(fileName: string, fileType: string = "pdf") {
         console.info("showfile", fileName, fileType);
         if (fileType === "pdf") {
@@ -267,18 +195,18 @@ export class CompareAllComponent {
 
     }
 
-    toggleScore(sent: ISentSimilarity, score: Score = Score.NOTMATCH) {
+    toggleScore(sent: ITargetBlock, score: Score = Score.NOTMATCH) {
 
         sent.target = score
-
-        this.csService.updateTarget(sent, sent.query.index).subscribe((result: any) => {
-            console.log(result);
-        })
+        /*
+                this.csMetaSvc.updateTarget(sent, sent.query.index).subscribe((result: any) => {
+                    console.log(result);
+                })*/
     }
 
     showEntityModal(section: IFileSection) {
         const modalRef = this.modalSvc.open(EntityModalContent, { centered: true, size: 'lg', windowClass: 'dark-modal' })
-
+        console.log(section.ents)
         modalRef.componentInstance.ents = section.ents;
         modalRef.componentInstance.text = section.text
     }

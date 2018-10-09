@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, SimpleChange } from '@angular/core';
-import { ISentSimilarity } from 'src/app/models/es.model';
+import { ITargetBlock } from 'src/app/models/file.model';
 
 @Component({
     selector: 'app-section-similarity',
@@ -17,7 +17,7 @@ import { ISentSimilarity } from 'src/app/models/es.model';
 })
 export class SectionTextComponent implements OnChanges {
 
-    @Input('data') doc: ISentSimilarity
+    @Input('data') doc: ITargetBlock
     textArray: Array<string> = new Array(3);
 
     constructor() {
@@ -27,7 +27,7 @@ export class SectionTextComponent implements OnChanges {
         for (let propName in changes) {
             let changedProp = changes[propName];
 
-            let to: ISentSimilarity = changedProp.currentValue;
+            let to: ITargetBlock = changedProp.currentValue;
             if (changedProp.isFirstChange()) {
                 this.textArray[0] = to.sectionText.substring(0, to.startChar)
                 this.textArray[1] = to.sectionText.substring(to.startChar, to.endChar)

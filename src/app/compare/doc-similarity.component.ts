@@ -1,7 +1,7 @@
 import { Component, Input, SimpleChange } from '@angular/core';
 
 import { Observable } from 'rxjs';
-import { IFile, IFileSent, IFileSection, IDocSentSimilarityStats, ISentSimilarity } from 'src/app/models/es.model';
+import { IFile, IFileSent, IFileSection, IDocSentSimilarityStats, ITargetBlock } from 'src/app/models/file.model';
 import { compare } from 'src/app/services/es-credit.service';
 interface UIFileSent extends IFileSent {
     sectionId: number;
@@ -44,7 +44,7 @@ export class DocSimilarityComponent {
                     this.document = <IDocSentSimilarityStats>clone(changedProp.currentValue);
                     //console.log(this.document)
                     var topNSents = [].concat(this.document.docSents)
-                    topNSents = [].concat(topNSents.sort(compare("sentSimilarity", "desc")).slice(0, this.topN))
+                    topNSents = [].concat(topNSents.sort(compare("similarity", "desc")).slice(0, this.topN))
                     //console.log("topNSents", topNSents)
                     this.docSents =
                         [].concat(
@@ -57,6 +57,8 @@ export class DocSimilarityComponent {
                                     })
                             })
                         );
+
+                    //console.log(this.docSents)
 
 
                 }

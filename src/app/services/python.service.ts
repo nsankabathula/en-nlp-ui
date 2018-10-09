@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-import { IFileSection } from 'src/app/models/es.model';
+import { IFileSection } from 'src/app/models/file.model';
 import { map, catchError } from 'rxjs/operators';
 import { Observable, of, from, throwError } from 'rxjs';
 
