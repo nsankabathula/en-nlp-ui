@@ -1,5 +1,7 @@
 import { IStat } from "src/app/models/es.model";
 
+import { IMap } from "src/app/models/model"
+
 const ENTITY_LABLES = { "GPE": [], "ORG": [], "MONEY": [] }
 
 export class ISentence {
@@ -86,7 +88,7 @@ export interface IFileSection extends IFileSectionMeta {
     sents?: Array<IFileSent>
     simStats?: IStat | any
     selected?: boolean
-
+    hide?: boolean
 }
 
 export interface IFileMeta {
@@ -166,11 +168,18 @@ export interface ITargetBlock {
     shortName: string
     sentStats: IDocSentSimilarityStats
     bookmark?: any
-
+    pdfFile: any
+    txtFile: any
 }
 
 export interface IDocSentSimilarityStats {
     stats: IStat,
     docSents: Array<ITargetBlock | IFileSent>
+}
+
+export interface IAttachment {
+    url: string,
+    name: string,
+    info: any
 }
 

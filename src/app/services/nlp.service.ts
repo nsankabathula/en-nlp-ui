@@ -3,58 +3,64 @@ import { Injectable } from '@angular/core';
 import { Observable, of, from, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 
-import { IFileMeta, IFile, ITargetBlock, IFileSectionMeta, IFileSection } from "src/app/models/file.model"
+import { IFileMeta, IFile, ITargetBlock, IFileSectionMeta, IFileSection, IAttachment, IEntity, } from "src/app/models/file.model"
 
 import { IFindQuery, IFindResult, IViewResult } from 'src/app/models/couchdb.model';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-const host = "http://localhost:8000/couchdb.v1/"
+import { IMap } from "src/app/models/model"
+
+
+import { environment } from '../../environments/environment';
+import { CouchDbService } from 'src/app/services/couchdb.service';
+
+const couchdbHost = environment.couchdb
+const defaultDb = "nlp-102"
+
 
 
 
 @Injectable()
 export class NlpService {
 
-    constructor(private http: HttpClient) {
+    constructor(private couchDb: CouchDbService) {
 
     }
 
-    private view<T>(db: string, viewName: string): Observable<IViewResult<T>> {
-        return this.http.get<T>(host + db + "/" + viewName).pipe(
-            map(
-                (result: IViewResult<T>) => {
-                    return result;
-                }
-            )
-        );
-    }
 
-    private findOne<T>(db: string, viewName: string): Observable<T> {
-        return this.view<T>(db, viewName).pipe(map((result: IViewResult<T>) => {
-            if (result && result.total_rows > 0)
-                return result.rows[0].doc
-            else
-                throwError(new Error("Result is empty"))
+
+
+    public master(db: string = defaultDb): Observable<IFile> {
+        return this.couchDb.findOne<IFile>(db, "master").pipe(map((master) => {
+            master.sections = master.sections.map((value: IFileSection) => {
+                value.ents = [].concat(master.ents.filter((ent: IEntity) => {
+                    return value.sectionId === ent.sectionId
+                }))
+
+                value.isCollapsed = true;
+                return value;
+            })
+
+            return master;
         }));
     }
 
-    private find<T>(db: string, query: IFindQuery, pagination: boolean = true): Observable<IFindResult<T>> {
-        return this.http.post(host + db + "/find/", query).pipe(map((result) => {
-            return <IFindResult<T>>result
-        }), catchError(e => throwError(e)))
-            ;
+    public attachments(db: string = defaultDb): Observable<IMap<IAttachment>> {
+        return this.couchDb.findAll<IMap<IAttachment>>(db, "attachments").pipe(map((result: Array<IAttachment>) => {
+            let attachmentMap: IMap<IAttachment> = {};
+            result.forEach((attachment: IAttachment) => {
+                attachmentMap[attachment.name.toLocaleUpperCase()] = attachment;
+            })
+
+            return attachmentMap;
+        }));
     }
 
-
-    public master(db: string = "nlp-101"): Observable<IFile> {
-        return this.findOne<IFile>(db, "master");
-    }
-
-    public target(section: IFileSection, db: string = "nlp-101"): Observable<Array<ITargetBlock>> {
+    public target(section: IFileSection, db: string = defaultDb): Observable<Array<ITargetBlock>> {
 
         var query: IFindQuery = {
-            limit: 10,
+            limit: 40,
             "sort": [
-
+                "name"
             ],
             "fields": [
                 "sentId",
@@ -104,7 +110,7 @@ export class NlpService {
         }
 
 
-        return this.find<ITargetBlock>(db, query).pipe(
+        return this.couchDb.find<ITargetBlock>(db, query).pipe(
             map(
                 (result: IFindResult<ITargetBlock>) => {
                     console.log(result)

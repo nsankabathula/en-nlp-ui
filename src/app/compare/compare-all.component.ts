@@ -3,8 +3,8 @@ import { Component, Input, ViewChild, TemplateRef, HostListener } from '@angular
 import { Observable } from 'rxjs';
 import { forkJoin } from "rxjs";
 import { error } from 'util';
-import { FileItem } from 'src/app/models/model';
-import { FileSection } from 'src/app/models/file.model';
+import { FileItem, IMap } from 'src/app/models/model';
+import { FileSection, IAttachment } from 'src/app/models/file.model';
 import { IESError, IHit, IAgreementSent, IESAggResult, IAggResult, IBucket, IStat } from 'src/app/models/es.model';
 
 import { IFile, ITargetBlock, IDocSentSimilarityStats } from "src/app/models/file.model"
@@ -53,15 +53,15 @@ export class CompareAllComponent {
         this.nlpSvc.master().subscribe((res) => {
 
             this.document = res;
-
-            this.document.sections = this.document.sections.map((value: IFileSection) => {
-                value.ents = [].concat(this.document.ents.filter((ent: IEntity) => {
-                    return value.sectionId === ent.sectionId
-                }))
-
-                value.isCollapsed = true;
-                return value;
-            })
+            /*
+                        this.document.sections = this.document.sections.map((value: IFileSection) => {
+                            value.ents = [].concat(this.document.ents.filter((ent: IEntity) => {
+                                return value.sectionId === ent.sectionId
+                            }))
+            
+                            value.isCollapsed = true;
+                            return value;
+                        })*/
 
             console.log("result", this.document);
 
@@ -116,12 +116,15 @@ export class CompareAllComponent {
 
     fetchDocSimilarities(section: IFileSection) {
 
-        this.nlpSvc.target(section).subscribe(
-            (result) => {
-                console.log("fetchDocSimilarities", result);
-                this.targetBlocks = result;
+        forkJoin([this.nlpSvc.target(section), this.nlpSvc.attachments()]).subscribe(
+            (results) => {
+                console.log("attachments", results[1])
+
+                let targets: Array<ITargetBlock> = results[0]
+                let attachmentMap = results[1];
+                console.log("fetchDocSimilarities", targets);
+                this.targetBlocks = targets;
                 this.targetBlocks = this.targetBlocks.map((row: ITargetBlock) => {
-                    var names = row.name.split("\\")
 
                     row.isCollapsed = true;
                     row.rank = row.rank + 1
@@ -136,26 +139,18 @@ export class CompareAllComponent {
 
                     }
                     row.clazz = StatusBadge[row.status]
-                    //row.shortName = row.name.substring(5, 20) + ".." + row.name.substring(row.name.length - 4)
-                    row.shortName = names[names.length - 1]
+                    row.shortName = row.name.substring(0, 20) + ".." + row.name.substring(row.name.length - 4)
                     row.sentStats = { stats: null, docSents: row["targetSents"] }
-                    //console.log(value.name + "_" + value.query.sectionId + "_1", value.startChar, value.endChar)
-                    /* this.csMetaSvc.getSentenceStats(value.name + "_" + value.query.sectionId + "_1", value.startChar, value.endChar)
-                         .subscribe(
-                         (stat: any) => {
-                             //console.log(stat)
-                             value.sentStats = stat
-                         }, ((error) => { console.error(error) }),
-                         () => {
-                             //console.log(value)
-                         }
-                         )*/
+                    row.txtFile = attachmentMap[row.name.toUpperCase()]
+                    const pdfFileName = row.name.substring(0, row.name.length - 3).toLocaleUpperCase() + "PDF"
+                    //console.log(pdfFileName);
+                    row.pdfFile = attachmentMap[pdfFileName]
 
                     return row;
                 });
                 this.targetBlocks[0].isCollapsed = false;
-
-            })
+            }
+        )
 
     }
 
@@ -174,14 +169,12 @@ export class CompareAllComponent {
             )
         }
     */
-    showFile(fileName: string, fileType: string = "pdf") {
-        console.info("showfile", fileName, fileType);
-        if (fileType === "pdf") {
-            fileName = fileName.split(".")[0] + ".pdf"
-        }
+    showFile(attachment: IAttachment, fileType: string = "pdf") {
+        console.info("showfile", attachment, fileType);
+        window.open(attachment.url, attachment.name)
 
 
-        window.open(this.pythonSvc.downloadUrl(fileName), fileName);
+        //window.open(this.pythonSvc.downloadUrl(fileName), fileName);
 
 
 

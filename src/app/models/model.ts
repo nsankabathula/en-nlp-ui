@@ -1,3 +1,9 @@
+export interface IMap<V> {
+    [key: string]: V
+}
+
+
+
 export class TLineItem {
     line_id: number;
     debug: string;
