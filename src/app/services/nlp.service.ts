@@ -14,9 +14,7 @@ import { environment } from '../../environments/environment';
 import { CouchDbService } from 'src/app/services/couchdb.service';
 
 const couchdbHost = environment.couchdb
-const defaultDb = "nlp-102"
-
-
+const defaultDb = "nlp-demo"
 
 
 @Injectable()
@@ -25,8 +23,6 @@ export class NlpService {
     constructor(private couchDb: CouchDbService) {
 
     }
-
-
 
 
     public master(db: string = defaultDb): Observable<IFile> {
