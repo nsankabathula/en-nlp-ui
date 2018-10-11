@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --host 0.0.0.0 --disableHostCheck true --configuration=nlp-demo",
-    "npl-demo": "ng serve --host 0.0.0.0 --disableHostCheck true --configuration=nlp-demo",
+    "nlp-demo": "ng serve --host 0.0.0.0 --disableHostCheck true --configuration=nlp-demo",
     "nlp-101": "ng serve --host 0.0.0.0 --disableHostCheck true --configuration=nlp-101",
     "build": "ng build",
     "test": "ng test",
