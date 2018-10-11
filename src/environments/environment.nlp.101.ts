@@ -5,6 +5,6 @@ export const environment = {
   esearch: Helper.tunnel("esearch"),
   webservice: Helper.tunnel("ws"),
   couchdb: Helper.tunnel("couchdb"),
-  db: "nlp-demo",
+  db: "nlp-101",
   configs: Helper.configs,
 };

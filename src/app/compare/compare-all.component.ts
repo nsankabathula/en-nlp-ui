@@ -72,6 +72,12 @@ export class CompareAllComponent {
 
     }
 
+    @HostListener('window:load')
+    onLoad() {
+        // call our matchHeight function here later        
+        this.resetHeight();
+    }
+
     resetHeight() {
         console.log("resetHeight", this.windowRef.nativeWindow.innerHeight)
         this.leftDivHeight = this.windowRef.nativeWindow.innerHeight * .9

@@ -15,12 +15,12 @@ import { HomeComponent } from 'src/app/common/home.component';
 import { AppBootstrapModule } from 'src/app/app-bootstrap.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CompareAllComponent } from 'src/app/compare/compare-all.component';
-import { CompareOneComponent } from 'src/app/compare/compare-one.component';
+//import { CompareOneComponent } from 'src/app/compare/compare-one.component';
 import { CompareService } from 'src/app/services/compare.service';
 import { CoreEsService } from 'src/app/services/es.service';
 import { CreditEsService } from 'src/app/services/es-credit.service';
 
-import { Ng5SliderModule } from 'ng5-slider';
+
 import { PyService } from 'src/app/services/python.service';
 import { SectionTextComponent } from 'src/app/compare/section-text.component';
 import { ModalContent } from 'src/app/common/modal-content.component';
@@ -41,14 +41,14 @@ import { NlpService } from 'src/app/services/nlp.service';
     TrainingComponent,
     HomeComponent,
     CompareAllComponent,
-    CompareOneComponent,
+    //CompareOneComponent,
     SectionTextComponent,
     ModalContent,
     Doc2VecTrainingComponent,
     EntityModalContent,
     EntityStyleDirective,
     DocSimilarityComponent,
-
+    MatchHeightDirective
   ],
   imports: [
     BrowserModule,
@@ -58,7 +58,6 @@ import { NlpService } from 'src/app/services/nlp.service';
     AppBootstrapModule,
     FormsModule,
     ReactiveFormsModule,
-    Ng5SliderModule,
     BrowserAnimationsModule,
 
 

@@ -14,7 +14,7 @@ import { environment } from '../../environments/environment';
 import { CouchDbService } from 'src/app/services/couchdb.service';
 
 const couchdbHost = environment.couchdb
-const defaultDb = "nlp-demo"
+const defaultDb = environment.db
 
 
 @Injectable()
