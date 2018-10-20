@@ -77,6 +77,8 @@ export interface IFileSent extends IFileSentMeta {
     endChar: number;
     similarity: number
     sentText?: string
+    rank?: number
+    confidence?: number
 
 }
 
@@ -148,13 +150,11 @@ export enum MatchStatus {
 
 export interface ITargetBlock {
     name: string;
-    sentId: number;
-    sentText: string
-    sectionId: number;
+    sectionId: number, //deprecated
+    sentId: number, // deprecated
     sectionText: string
-    sentSimilarity: number;
-    startChar: number;
-    endChar: number,
+    startChar: number,//deprecated
+    endChar: number,//deprecated
     query: any;
     isCollapsed?: boolean;
     target: Score;

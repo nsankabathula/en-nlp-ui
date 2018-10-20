@@ -1,7 +1,7 @@
 import { Component, Input, ViewChild, TemplateRef, HostListener } from '@angular/core';
 
-import { Observable } from 'rxjs';
-import { forkJoin } from "rxjs";
+import { Observable, forkJoin, of, Subject } from 'rxjs';
+import { tap, debounceTime, map, distinctUntilChanged, switchMap, merge, catchError, filter } from "rxjs/operators";
 import { error } from 'util';
 import { FileItem, IMap } from 'src/app/models/model';
 import { FileSection, IAttachment } from 'src/app/models/file.model';
@@ -18,9 +18,10 @@ import { NgbModal, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap/';
 import { ModalContent } from 'src/app/common/modal-content.component';
 import { EntityModalContent } from 'src/app/compare/entity.component';
 import { WindowRef } from 'src/app/services/window.service';
-
+import { NgbTypeaheadConfig, NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
 
 import { NlpService } from 'src/app/services/nlp.service';
+
 
 declare let window;
 
@@ -41,6 +42,17 @@ export class CompareAllComponent {
     INDEX: string = "";
     leftDivHeight: number = 880
 
+    currentSection: IFileSection;
+
+    searching = false;
+    searchFailed = false;
+    filterTargetBlocks$: any;
+    hideSearchingWhenUnsubscribed = new Observable(() => () => this.searching = false);
+    searchModel: any
+    searchResultFormatter = (x: { name: string }) => x.name;
+    @ViewChild('instance') instance: NgbTypeahead;
+    click$ = new Subject<string>();
+
     SCORE = Score;
 
     @ViewChild('showDocModal')
@@ -48,24 +60,58 @@ export class CompareAllComponent {
 
     constructor(//private csMetaSvc: CreditEsService, 
         private pythonSvc: PyService,
-        private modalSvc: NgbModal, private windowRef: WindowRef, private nlpSvc: NlpService) {
+        private modalSvc: NgbModal, private windowRef: WindowRef, private nlpSvc: NlpService, config: NgbTypeaheadConfig) {
 
+        config.showHint = true;
+
+        this.filterTargetBlocks$ = (termSubject$: Observable<string>) => {
+            return termSubject$.pipe(
+                debounceTime(300)
+                , distinctUntilChanged()
+                /*, tap(() => {
+                    console.log("searching");
+                    this.searching = true;
+                })
+                */
+                , switchMap((term) =>
+                    (this.currentSection && term.length > 2) ?
+                        this.fetchResults(this.nlpSvc.targetFilter(this.currentSection, term), this.nlpSvc.attachments())
+                            .pipe(
+                            tap(() => {
+                                this.searchFailed = false
+                                console.log("got results")
+                            })
+                            , map((result) => {
+                                console.log(result[0]);
+
+                                return result[0];
+                            })
+                            , catchError(() => {
+                                this.searchFailed = false;
+                                console.error("searching failed")
+                                return of([]);
+                            }))
+                        : []
+
+
+                )
+                , tap(() => {
+                    this.searching = false;
+                    console.log("searching complete")
+                })
+                , merge(this.hideSearchingWhenUnsubscribed)
+
+            );
+
+        }
         this.nlpSvc.master().subscribe((res) => {
 
             this.document = res;
-            /*
-                        this.document.sections = this.document.sections.map((value: IFileSection) => {
-                            value.ents = [].concat(this.document.ents.filter((ent: IEntity) => {
-                                return value.sectionId === ent.sectionId
-                            }))
-            
-                            value.isCollapsed = true;
-                            return value;
-                        })*/
-
             console.log("result", this.document);
 
         })
+
+
 
 
 
@@ -80,7 +126,7 @@ export class CompareAllComponent {
 
     resetHeight() {
         console.log("resetHeight", this.windowRef.nativeWindow.innerHeight)
-        this.leftDivHeight = this.windowRef.nativeWindow.innerHeight * .9
+        this.leftDivHeight = this.windowRef.nativeWindow.innerHeight * .83
         console.log("leftDivHeight", this.leftDivHeight)
     }
 
@@ -120,8 +166,50 @@ export class CompareAllComponent {
         this.fetchDocSimilarities(section);
     }
 
-    fetchDocSimilarities(section: IFileSection) {
+    fetchResults(targets: Observable<Array<ITargetBlock>>, attachments: Observable<IMap<IAttachment>>) {
+        return forkJoin([targets, attachments]).pipe(
+            map((results) => {
+                console.log("attachments", results[1])
 
+                let targets: Array<ITargetBlock> = results[0]
+                let attachmentMap = results[1];
+                console.log("fetchDocSimilarities", targets);
+                this.targetBlocks = targets;
+                this.targetBlocks = this.targetBlocks.map((row: ITargetBlock) => {
+
+                    row.isCollapsed = true;
+                    row.rank = row.rank + 1
+                    row.confidence = ((row.rank / row.docCount) * 100)
+                    row.status = MatchStatus[(row.confidence < MATCH_BREAKS.MATCH) ? MatchStatus.MATCH : ((row.confidence > MATCH_BREAKS.NOTMATCH) ? MatchStatus.NOTMATCH : MatchStatus.UKNOWN)]
+
+                    row.confidence = (MatchStatus[MatchStatus.MATCH] == row.status) ? 100 - row.confidence : row.confidence;
+                    row.style = {
+                        background:
+                            (row.status == MatchStatus[MatchStatus.MATCH]) ? "linear-gradient(to bottom, #33ccff " + row.confidence + "%, #33cc33 100%)" :
+                                "linear-gradient(to bottom, #33ccff 0%, #ccff33" + row.confidence + "%)"
+
+                    }
+                    row.clazz = StatusBadge[row.status]
+                    row.shortName = row.name.substring(0, 20) + ".." + row.name.substring(row.name.length - 4)
+                    row.sentStats = { stats: null, docSents: row["targetSents"] }
+                    row.txtFile = attachmentMap[row.name.toUpperCase()]
+                    const pdfFileName = row.name.substring(0, row.name.length - 3).toLocaleUpperCase() + "PDF"
+                    //console.log(pdfFileName);
+                    row.pdfFile = attachmentMap[pdfFileName]
+
+                    return row;
+                });
+                this.targetBlocks[0].isCollapsed = false;
+                return results;
+            })
+        )
+    }
+    fetchDocSimilarities(section: IFileSection) {
+        this.currentSection = section;
+        this.fetchResults(this.nlpSvc.target(section), this.nlpSvc.attachments()).subscribe((results) => {
+            console.log("do something", results)
+        });
+        /*
         forkJoin([this.nlpSvc.target(section), this.nlpSvc.attachments()]).subscribe(
             (results) => {
                 console.log("attachments", results[1])
@@ -157,8 +245,11 @@ export class CompareAllComponent {
                 this.targetBlocks[0].isCollapsed = false;
             }
         )
+        */
 
     }
+
+
 
 
     /*

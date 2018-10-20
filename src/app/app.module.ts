@@ -32,6 +32,8 @@ import { MatchHeightDirective } from 'src/app/common/match-height.directive';
 import { WindowRef } from 'src/app/services/window.service';
 import { CouchDbService } from 'src/app/services/couchdb.service';
 import { NlpService } from 'src/app/services/nlp.service';
+import { AppMaterialModule } from 'src/app/app-material.module';
+import { SideNavBar } from 'src/app/common/nav.side.component';
 
 
 @NgModule({
@@ -48,7 +50,8 @@ import { NlpService } from 'src/app/services/nlp.service';
     EntityModalContent,
     EntityStyleDirective,
     DocSimilarityComponent,
-    MatchHeightDirective
+    MatchHeightDirective,
+    SideNavBar
   ],
   imports: [
     BrowserModule,
@@ -56,6 +59,7 @@ import { NlpService } from 'src/app/services/nlp.service';
     //NgbModule.forRoot(),
     AppRoutingModule,
     AppBootstrapModule,
+    AppMaterialModule,
     FormsModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,

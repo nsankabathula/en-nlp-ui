@@ -1,0 +1,48 @@
+<div class="continer-fuild ">
+    <mat-toolbar>
+        Header
+        <!--<app-nav></app-nav>-->
+        <span class="nav-fill-remaining-space "></span>
+
+        <!--
+                                            <button class="btn btn-secondary btn-sm " aria-label="download " [matMenuTriggerFor]="downlodMenu ">
+                                            <i class="material-icons md-18 ">file_download</i>
+                                        </button>
+                                        <mat-menu #downlodMenu="matMenu " overlapTrigger=false yPosition="below " xPosition="after " title="Pending implementaion ">
+                            
+                                            <button mat-menu-item disabled>CME</button>
+                                            <button mat-menu-item disabled>Generic</button>
+                                            <button mat-menu-item disabled>ICE</button>
+                                        </mat-menu>
+                                    -->
+        <mat-slide-toggle (click)="sidenav.toggle() "></mat-slide-toggle>
+    </mat-toolbar>
+    <mat-sidenav-container class="nav-container" [style.max-height.px]="windowHeight ">
+
+        <mat-sidenav #sidenav mode="side" opened="false" class="nav-sidenav" fixedInViewport="false" fixedTopGap="0" fixedBottomGap="0">
+            <div class="row">
+                <div class="col-sm-6">
+                    test
+                </div>
+                <div class="col-sm-6">
+                    {{windowHeight}}
+                </div>
+            </div>
+
+
+        </mat-sidenav>
+
+        <mat-sidenav-content class="continer-fuild">
+
+            <div class="continer-fuild">
+                <router-outlet></router-outlet>
+            </div>
+
+
+
+
+        </mat-sidenav-content>
+
+    </mat-sidenav-container>
+    <mat-toolbar class="nav-footer ">Footer</mat-toolbar>
+</div>

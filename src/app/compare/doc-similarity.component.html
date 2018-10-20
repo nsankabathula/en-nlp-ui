@@ -3,7 +3,17 @@
 
 
         <ng-container *ngFor="let sent of docSents">
-            <!--<span class="badge badge-info">{{sent.sentSimilarity | number:'1.1-2'}}</span>-->
+
+            <span class="badge badge-info">{{sent.similarity | number:'1.1-2'}}</span>
+            <span class="badge badge-warning">{{sent.rank | number:'1.0'}}</span>
+            <span [ngClass]="sent.label">
+
+                {{sent.text}}
+
+
+            </span>
+            <br/>
+            <!--
             <div *ngIf="sent.label === 'none';then none else highlight">
             </div>
 
@@ -20,7 +30,8 @@
                 </span>
 
             </ng-template>
-
+            
+        -->
         </ng-container>
 
 

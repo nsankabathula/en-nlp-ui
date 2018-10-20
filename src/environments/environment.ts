@@ -8,7 +8,7 @@ export const environment = {
   webservice: Helper.tunnel("ws"),
   configs: Helper.configs,
   couchdb: Helper.tunnel("couchdb"),
-  db: "nlp-demo"
+  db: "nlp-party"
 };
 
 /*

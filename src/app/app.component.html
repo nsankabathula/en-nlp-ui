@@ -1,7 +1,10 @@
 <!--The content below is only a placeholder and can be replaced.-->
-<div class="container-fuild">
-  <app-nav></app-nav>
-  <div class="continer-fuild">
+<div class="container-fuild" [style.max-height.px]="windowHeight">
+  <!--  <app-nav></app-nav>
+  <div class="continer-fuild ">
     <router-outlet></router-outlet>
   </div>
+-->
+
+  <app-nav-side [windowHeight]="windowHeight * .98"></app-nav-side>
 </div>

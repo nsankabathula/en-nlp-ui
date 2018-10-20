@@ -1,4 +1,4 @@
-<div class="container-fluid ">
+<div class="container-fluid " [style.max-height.px]="leftDivHeight">
     <div class="row">
         <!--
         <div class="col-sm-3">
@@ -44,19 +44,25 @@
             </div>
         </div>
 
-        <!--
+
         <div class="col-sm-6">
             <div class="row">
-                <div class="col-sm-6 justify-content-start">
-                    <form class="form-inline my-2 my-lg-0">
+                <div class="col-9 justify-content-start">
+                    <form class=" col-9">
 
-                        <input class="form-control mr-lg-2" type="search" placeholder="Target Document" aria-label="Search">
-                        <i class="material-icons md-18">
-                            search
-                        </i>
+                        <input class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="searchModel" [class.is-invalid]="searchFailed"
+                            [resultTemplate]="rt" [ngbTypeahead]="filterTargetBlocks$" type="input" placeholder="Target Document"
+                            aria-label="Search" #instance="ngbTypeahead" [inputFormatter]="searchResultFormatter" (click)="click$.next($event.target.value)">
+
+                        <span *ngIf="searching">searching...</span>
+                        <ng-template #rt let-r="result" let-t="term">
+                            <ngb-highlight [result]="r.name" [term]="t"></ngb-highlight>
+                        </ng-template>
+
                     </form>
+
                 </div>
-                <div class="col-sm-6 pagination justify-content-end">
+                <div class="col-sm-3 pagination justify-content-end">
                     <div class="btn-group " role="group" aria-label="target button group">
 
                         <button class="btn btn-outline-secondary btn-sm">
@@ -74,7 +80,7 @@
 
             </div>
         </div>
-    -->
+
 
     </div>
     <div class="row" style="height: 100%">
@@ -148,11 +154,12 @@
                                     <button class="btn btn-link" data-toggle="collapse" (click)="doc.isCollapsed = !doc.isCollapsed" aria-expanded="false" aria-controls="collapseOne"
                                         [title]="doc.name">
                                         {{doc.shortName }}
-
+                                        <span class="badge badge-info">{{doc.rank}} / {{doc.docCount}} => {{doc.rank/doc.docCount}}</span>
                                     </button>
                                 </div>
                                 <div class="col-sm-3">
                                     <span [ngClass]="doc.clazz">{{doc.status}} # {{doc.confidence | number : '1.2-2'}}% </span>
+
                                 </div>
                                 <div class="col-sm-1">
                                     <div class="btn-group" role="group" aria-label="target button group">
@@ -181,10 +188,9 @@
 
                             <div class="card-body">
 
-                                <!--{{doc.sectionText}}-->
-                                <app-doc-similarity [doc]="doc.sentStats"></app-doc-similarity>
-                                <br/>
 
+                                <app-doc-similarity [doc]="doc.sentStats"></app-doc-similarity>
+                                <br/> {{doc.sectionText}}
 
 
                             </div>

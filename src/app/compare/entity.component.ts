@@ -61,7 +61,7 @@ export class EntityModalContent implements OnChanges, OnInit {
                 that.ents.forEach((ent: IEntity) => {
                     //console.log(ent)
 
-                    if (ent.label !== "ORG" && ent.label !== "GPEx" && ent.label !== "PERSONx") {
+                    if (ent.label !== "ORGx" && ent.label !== "GPEx" && ent.label !== "PERSONx") {
                         if (!that.entMap.has(ent.label)) {
                             that.entMap.set(ent.label, []);
                         }

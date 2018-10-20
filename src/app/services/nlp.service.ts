@@ -59,19 +59,15 @@ export class NlpService {
                 "name"
             ],
             "fields": [
-                "sentId",
-                "sentText",
-                "startChar",
-                "endChar",
+                "id",
                 "name",
-                "sentSimilarity",
-                "sectionId",
                 "sectionText",
                 "query",
-                "words",
                 "rank",
                 "docCount",
-                "targetSents"
+                "targetSents",
+                "sents",
+                "targetBlocks"
             ],
             "selector": {
                 "sectionId": {
@@ -117,6 +113,111 @@ export class NlpService {
 
     }
 
+    public targetFilter(section: IFileSection, term: string, db: string = defaultDb): Observable<Array<ITargetBlock>> {
+
+        var query: IFindQuery = {
+            limit: 40,
+            "sort": [
+                "name"
+            ],
+            "fields": [
+                "id",
+                "name",
+                "sectionText",
+                "query",
+                "rank",
+                "docCount",
+                "targetSents",
+                "sents",
+                "targetBlocks"
+            ],
+            "selector": {
+                "sectionId": {
+                    "$eq": -1
+                },
+                "$and": [
+                    {
+                        "sectionId": {
+                            "$eq": -1
+                        }
+                    },
+
+                    {
+                        "name": {
+                            "$regex": "(?i)^.*" + term + ".*$"
+                        }
+                    },
+                    {
+                        "query": {
+                            "sectionId": {
+                                "$eq": section.title
+                            }
+                        }
+                    }
+                ]
+            },
+            execution_stats: true
+
+
+            /*
+            "selector": {
+                "bool": {
+                    "must": {
+                        "term": { "sectionId": -2 }
+                    }
+                }
+            }*/
+        }
+
+
+        return this.couchDb.find<ITargetBlock>(db, query).pipe(
+            map(
+                (result: IFindResult<ITargetBlock>) => {
+                    console.log(result)
+                    return result.docs
+                }
+            )
+        );
+
+    }
+
+    public search(term: string, db: string = defaultDb): Observable<Array<string>> {
+        if (term === '') {
+            return of([]);
+        }
+        var query: IFindQuery = {
+            limit: 40,
+            sort: [
+            ],
+            fields: [
+                "name"
+            ],
+            selector: {
+                "type": {
+                    "$eq": "meta"
+                },
+                "$and": [
+                    {
+                        "name": {
+                            "$regex": "(?i)^.*" + term + ".*$"
+                        }
+                    }
+                ]
+            },
+            execution_stats: true
+
+        }
+
+
+        return this.couchDb.find<string>(db, query).pipe(
+            map(
+                (result: IFindResult<string>) => {
+                    console.log(result)
+                    return result.docs
+                }
+            )
+        );
+    }
 
 
 }
